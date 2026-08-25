@@ -86,6 +86,23 @@ cmake --build build --target skyroads
   renderer
 - `make_app.sh` — builds the signed `SkyRoads.app` bundle
 
+## Roadmap
+
+Ideas being considered — no promises, no dates. Opinions and requests
+are welcome as [issues](https://github.com/pedrocatalao/skyroads-mac/issues).
+
+- **Online leaderboards** — per-road finish times, plus efficiency boards
+  (least fuel / oxygen used)
+- **More visual effects** — building on the CRT mode (scanlines and
+  phosphor trails are in already)
+- **Gamepad support**
+- **Windows and Linux builds** — the code is portable C + SDL2; it's
+  mostly packaging work
+- **High-resolution road rendering** — regenerating the renderer's
+  perspective geometry at 2–4× (the original art stays pixel-perfect)
+- **Demo/attract mode** — the original's recorded demo playback, not yet
+  ported
+
 ## Troubleshooting
 
 - **"required data file … not found"** — the path you gave `make_app.sh` must
