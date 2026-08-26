@@ -34,7 +34,7 @@ target_link_libraries(asset_test PRIVATE SDL2::SDL2)
 
 add_executable(skyroads ${CORE_SRC} src/assets.c src/menus.c src/audio.c src/opl3.c src/render.c src/game_play.c src/main.c)
 target_include_directories(skyroads PRIVATE src)
-target_link_libraries(skyroads PRIVATE SDL2::SDL2)
+target_link_libraries(skyroads PRIVATE SDL2::SDL2 m)
 
 add_executable(trek_test src/compat.c src/assets_headless.c src/render.c src/trek_test.c)
 target_include_directories(trek_test PRIVATE src)
