@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef uint32_t ulong;                 /* the original's 32-bit ulong */
+typedef uint32_t my_ulong;                 /* the original's 32-bit ulong */
 
 enum game_result {NO_CRASH=0,WALL_CRASH,EXPLOSION,HOLE,FUEL_OUT,OXY_OUT,
                   TUNNEL_MISSED,ABORT};
