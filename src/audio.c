@@ -213,7 +213,7 @@ static void audio_cb(void *ud, Uint8 *stream, int len) {
             n = 1;
             int16_t sm[2];
             OPL3_GenerateResampled(&chip, sm);
-            int ml = sm[0] * 7 / 5, mr = sm[1] * 7 / 5;   /* music ~-3 dB vs before */
+            int ml = sm[0] * 2, mr = sm[1] * 2;
             out[i * 2]     = (int16_t)(ml > 32767 ? 32767 : ml < -32768 ? -32768 : ml);
             out[i * 2 + 1] = (int16_t)(mr > 32767 ? 32767 : mr < -32768 ? -32768 : mr);
         }
@@ -249,7 +249,7 @@ void audio_init(void) {
     snprintf(sf, sizeof sf, "%s/TimGM6mb.sf2", sky_data_dir());
     wt = tsf_load_filename(sf);
     if (wt) {
-        tsf_set_output(wt, TSF_STEREO_INTERLEAVED, SAMPLE_RATE, -6.0f);
+        tsf_set_output(wt, TSF_STEREO_INTERLEAVED, SAMPLE_RATE, -3.0f);
         tsf_channel_set_bank_preset(wt, 9, 128, 0);   /* GM drums */
         wt_on = 0;                    /* default: authentic AdLib FM; F9 for AWE32 */
         plat_f9_hook = wt_toggle;
