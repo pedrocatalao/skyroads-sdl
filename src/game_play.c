@@ -19,7 +19,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef uint32_t ulong;                 /* the original's 32-bit ulong */
+typedef uint32_t dulong;    /* the original's 32-bit ulong; 'd' avoids
+                               colliding with glibc's ulong on Linux */
 
 enum game_result {NO_CRASH=0,WALL_CRASH,EXPLOSION,HOLE,FUEL_OUT,OXY_OUT,
                   TUNNEL_MISSED,ABORT};
@@ -120,7 +121,7 @@ static void gt_set(duint v) { gt_bias = (duint)(v - Time); }
 /* ---------------------- game state (game.c globals) ---------------------- */
 
                 /* current coordinates */
-ulong x;        /*   65536*slabs   */
+dulong x;        /*   65536*slabs   */
 duint y, z;     /*   128*pixels    */
                 /* current speed:  */
 slong vx;       /*   65536*slabs/volatile tick */
@@ -173,7 +174,7 @@ static const duint car_ani_sequence[]={0,1,2,1};
 static duint sound_fx_time;
 
 static duint show_level_only = 0;       /* retail flow never sets this */
-static ulong show_level_timer;
+static dulong show_level_timer;
 
 static duint tmpheap_seg;               /* scratch segment for gauge blits */
 static duint vga_buf_seg;               /* 320*DASHBOARD_Y work page       */
@@ -338,11 +339,11 @@ static void text(duint tx,duint ty,const char *s,duint col)
     }
 }
 
-static duint get_slab(ulong x,duint y)
+static duint get_slab(dulong x,duint y)
 {
     y=(duint)(y/128-LEFT_BORDER);
     if (y < SLABS*SLAB_WIDTH) {         /* this is not true with y<LEFT_BORDER either */
-        ulong row=(x/(65536L/SLAB_STEP))/SLAB_STEP;
+        dulong row=(x/(65536L/SLAB_STEP))/SLAB_STEP;
         if (row >= MAX_STAGE_LEN+8)     /* off the stored road (portable safety) */
             return 0;
         return Road_Dat[row][y/SLAB_WIDTH];
@@ -351,7 +352,7 @@ static duint get_slab(ulong x,duint y)
         return 0;
 }
 
-static duint car_inside_tunnel_(ulong x,duint y,duint z)
+static duint car_inside_tunnel_(dulong x,duint y,duint z)
 {   duint slab_type,a_deviation;
 
     slab_type=get_slab(x,y)&TYPE_MASK;
@@ -392,7 +393,7 @@ static duint turn_car(duint y)          /* returns 0..TURN_IMAGES-1 */
     return (duint)yy;
 }
 
-static duint surface_z(ulong x,duint y,duint inside_tunnel)
+static duint surface_z(dulong x,duint y,duint inside_tunnel)
 {   duint slab,slab_type;               /* height of the world at given x,y */
 
     slab=get_slab(x,y);
@@ -413,7 +414,7 @@ static duint surface_z(ulong x,duint y,duint inside_tunnel)
 }
 
 static void display(duint sticky)       /* displays one frame */
-{   static ulong ex;
+{   static dulong ex;
     static duint ey,ez,ecar_nr,evid_page;
     duint car_nr;
     duint inside_tunnel,left_surface_z,right_surface_z;
@@ -469,7 +470,7 @@ static duint display_road_end(void)
             return ABORT;
         display(0);
         wait_for_time_tick();
-        x+=(ulong)vx;
+        x+=(dulong)vx;
     }
     return NO_CRASH;
 }
@@ -617,7 +618,7 @@ static void display_controls(void)
 
     /* display distance */
 
-    distance=(duint)((x-BEG_X)/(((ulong)road_len*65536UL-BEG_X)/
+    distance=(duint)((x-BEG_X)/(((dulong)road_len*65536UL-BEG_X)/
                                                     (DIST_DIVISIONS+1)));
     if (distance > DIST_DIVISIONS)
         distance=DIST_DIVISIONS;
@@ -652,7 +653,7 @@ static duint car_inside_building(duint slab,duint y_deviation,duint z)
     return 0;   /* original falls off the switch (undefined AX) */
 }
 
-static duint car_inside_something(ulong x,duint y,duint z)
+static duint car_inside_something(dulong x,duint y,duint z)
 {   duint slab,l_slab,r_slab;
     duint a_deviation,b_offset;
 
@@ -683,20 +684,20 @@ static duint car_inside_something(ulong x,duint y,duint z)
     return 0;
 }
 
-static void change_coordinates(ulong target_x,duint target_y,duint target_z)
+static void change_coordinates(dulong target_x,duint target_y,duint target_z)
 {   duint i;
     sint step;
-    ulong lstep;
+    dulong lstep;
 
     if (x == target_x && y == target_y && z == target_z)
         return;
     for (i=1;i <= COORD_STEPS;i++)
-        if (car_inside_something(x+(ulong)((slong)((target_x-x)*i)/COORD_STEPS),
+        if (car_inside_something(x+(dulong)((slong)((target_x-x)*i)/COORD_STEPS),
                     (duint)(y+(sint)(duint)((duint)(target_y-y)*i)/COORD_STEPS),
                     (duint)(z+(sint)(duint)((duint)(target_z-z)*i)/COORD_STEPS)
                     ))
             break;
-    x+=(ulong)((slong)((target_x-x)*(i-1))/COORD_STEPS);
+    x+=(dulong)((slong)((target_x-x)*(i-1))/COORD_STEPS);
     y=(duint)(y+(sint)(duint)((duint)(target_y-y)*(i-1))/COORD_STEPS);
     z=(duint)(z+(sint)(duint)((duint)(target_z-z)*(i-1))/COORD_STEPS);
 
@@ -741,7 +742,7 @@ static void process_slab(duint slab)
     bound(vx,0,MAX_SPEED);
 }
 
-static duint slab_bad(ulong x,duint y)
+static duint slab_bad(dulong x,duint y)
 {   duint slab,slab_type;
 
     slab=get_slab(x,y);
@@ -759,15 +760,15 @@ static duint slab_bad(ulong x,duint y)
         return 0;
 }
 
-static duint simulate_jump(ulong x,duint y,duint z,slong vx,sint ay,sint vz)
+static duint simulate_jump(dulong x,duint y,duint z,slong vx,sint ay,sint vz)
 {   duint e_y;
-    ulong e_x;                          /* returns 1 if jump successful */
+    dulong e_x;                          /* returns 1 if jump successful */
 
     do {
         e_y=y;
         e_x=x;
         vz=(sint)(vz+z_acc);
-        x+=(ulong)vx;
+        x+=(dulong)vx;
         y=(duint)(y+(duint)((vx+STANDING_VX)*ay/(65536L/128))+(duint)sink_vy);
         if (y < LEFT_BORDER*128 || y > (LEFT_BORDER+SLABS*SLAB_WIDTH)*128)
             return 0;
@@ -815,10 +816,10 @@ static duint game_body(void)
     duint jump_adjusted,jumping,jump_z,on_ground,slippery,sticky,hole,slab,i;
     duint sink_distance;
     duint target_y,target_z;
-    ulong target_x;
+    dulong target_x;
     sint sink_direction;
 
-    z_acc=-(sint)(JUMP_HEIGHT*128*(ulong)gravity/(JUMP_TIME*JUMP_TIME));
+    z_acc=-(sint)(JUMP_HEIGHT*128*(dulong)gravity/(JUMP_TIME*JUMP_TIME));
 
     x=BEG_X;
     y=CENTER;
@@ -915,7 +916,7 @@ static duint game_body(void)
             }
             else
                 sticky=0;
-            if (x >= ((ulong)road_len*65536UL-ROAD_END_LEN) &&
+            if (x >= ((dulong)road_len*65536UL-ROAD_END_LEN) &&
                         car_inside_tunnel_(x,y,z) && crash_type == NO_CRASH) {
                 return display_road_end();
             }
@@ -975,7 +976,7 @@ static duint game_body(void)
 
 /***************** Change x, y, z; react to obstacles ***********************/
 
-            target_x=x+(ulong)vx;
+            target_x=x+(dulong)vx;
             target_y=(duint)(y+(duint)((vx+(sticky?0:STANDING_VX))*ay/
                                         (65536L/128))+(duint)sink_vy);
             target_z=(duint)(z+(duint)vz);
@@ -1007,7 +1008,7 @@ static duint game_body(void)
                         crash_type=WALL_CRASH;
                 }
                 else
-                    if (x > target_x-(ulong)vx)
+                    if (x > target_x-(dulong)vx)
                         gen_sound_fx(PUSH_SFX);
                 vx=0;
             }
