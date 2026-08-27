@@ -27,19 +27,20 @@ is self-contained.
 brew install cmake sdl2
 git clone https://github.com/pedrocatalao/skyroads-mac.git
 cd skyroads-mac
-./make_app.sh        # fetches the freeware game data, then builds the app
+./make_mac.sh        # fetches the freeware game data, then builds the app
 open build/SkyRoads.app
 ```
 
-That's it. If the game data isn't in `./data` yet, `make_app.sh` downloads
-it from Bluemoon's official site (the game is their freeware and is not part
-of this repo), then builds a self-contained app bundle around it.
+That's it. If the game data isn't in `./data` yet, `get_data.sh` fetches it
+automatically from Bluemoon's official site (the game is their freeware and
+is not part of this repo); `make_mac.sh` then builds a self-contained app
+bundle around it.
 
-Already have the game files? Point `make_app.sh` at your folder —
+Already have the game files? Point `make_mac.sh` at your folder —
 DOS-style uppercase filenames (`ROADS.LZS`) are fine:
 
 ```bash
-./make_app.sh ~/Downloads/skyroads-data
+./make_mac.sh ~/Downloads/skyroads-data
 ```
 
 The app is self-contained (game data is copied into the bundle) — you can move
@@ -84,7 +85,9 @@ cmake --build build --target skyroads
     SoundFont wavetable synth (TimGM6mb) mapped to MIDI instruments; plus the SoundBlaster digitized sound effects (`sfx.snd`)
 - `docs/trek_blueprint.md` — reverse-engineering notes on the original
   renderer
-- `make_app.sh` — builds the signed `SkyRoads.app` bundle
+- `make_mac.sh` — builds the signed `SkyRoads.app` bundle
+- `get_data.sh` — fetches the freeware game data + soundfont (shared by the
+  build scripts, or run standalone)
 
 ## Roadmap
 
@@ -105,7 +108,7 @@ are welcome as [issues](https://github.com/pedrocatalao/skyroads-mac/issues).
 
 ## Troubleshooting
 
-- **"required data file … not found"** — the path you gave `make_app.sh` must
+- **"required data file … not found"** — the path you gave `make_mac.sh` must
   contain the SkyRoads data files (`trekdat.lzs`, `roads.lzs`, `world*.lzs`,
   …). Point it at the folder where you unzipped the freeware download.
 - **CMake can't find SDL2** — `brew install sdl2`, then delete
@@ -124,5 +127,5 @@ are welcome as [issues](https://github.com/pedrocatalao/skyroads-mac/issues).
   (Nuke.YKT), LGPL-2.1 — see `src/opl3.c` for its license header.
 - Wavetable music mode via [TinySoundFont](https://github.com/schellingb/TinySoundFont)
   (MIT) playing the [TimGM6mb](https://musescore.org) SoundFont (GPL,
-  Tim Brechbill), fetched by `make_app.sh` — the instrument mapping was
+  Tim Brechbill), fetched by `get_data.sh` — the instrument mapping was
   reconstructed from the original Sound Club song sources.
