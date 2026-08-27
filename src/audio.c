@@ -213,8 +213,9 @@ static void audio_cb(void *ud, Uint8 *stream, int len) {
             n = 1;
             int16_t sm[2];
             OPL3_GenerateResampled(&chip, sm);
-            out[i * 2]     = (int16_t)(sm[0] * 2 > 32767 ? 32767 : sm[0] * 2);
-            out[i * 2 + 1] = (int16_t)(sm[1] * 2 > 32767 ? 32767 : sm[1] * 2);
+            int ml = sm[0] * 7 / 5, mr = sm[1] * 7 / 5;   /* music ~-3 dB vs before */
+            out[i * 2]     = (int16_t)(ml > 32767 ? 32767 : ml < -32768 ? -32768 : ml);
+            out[i * 2 + 1] = (int16_t)(mr > 32767 ? 32767 : mr < -32768 ? -32768 : mr);
         }
         i += n;
     }
@@ -222,7 +223,7 @@ static void audio_cb(void *ud, Uint8 *stream, int len) {
     for (int i = 0; i < frames && pcm_buf; i++) {
         uint32_t p = pcm_pos_fx >> 16;
         if (p >= pcm_len) { pcm_buf = NULL; break; }
-        int s = ((int)pcm_buf[p] - 128) << 7;
+        int s = ((int)pcm_buf[p] - 128) << 8;    /* sfx louder, like a real SB */
         pcm_pos_fx += pcm_step;
         int l = out[i * 2] + s, r = out[i * 2 + 1] + s;
         out[i * 2]     = (int16_t)(l > 32767 ? 32767 : l < -32768 ? -32768 : l);
@@ -248,7 +249,7 @@ void audio_init(void) {
     snprintf(sf, sizeof sf, "%s/TimGM6mb.sf2", sky_data_dir());
     wt = tsf_load_filename(sf);
     if (wt) {
-        tsf_set_output(wt, TSF_STEREO_INTERLEAVED, SAMPLE_RATE, -3.0f);
+        tsf_set_output(wt, TSF_STEREO_INTERLEAVED, SAMPLE_RATE, -6.0f);
         tsf_channel_set_bank_preset(wt, 9, 128, 0);   /* GM drums */
         wt_on = 0;                    /* default: authentic AdLib FM; F9 for AWE32 */
         plat_f9_hook = wt_toggle;
