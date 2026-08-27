@@ -223,7 +223,7 @@ static void audio_cb(void *ud, Uint8 *stream, int len) {
     for (int i = 0; i < frames && pcm_buf; i++) {
         uint32_t p = pcm_pos_fx >> 16;
         if (p >= pcm_len) { pcm_buf = NULL; break; }
-        int s = ((int)pcm_buf[p] - 128) << 8;    /* sfx louder, like a real SB */
+        int s = ((int)pcm_buf[p] - 128) * 200;   /* sfx +4 dB over the old mix */
         pcm_pos_fx += pcm_step;
         int l = out[i * 2] + s, r = out[i * 2 + 1] + s;
         out[i * 2]     = (int16_t)(l > 32767 ? 32767 : l < -32768 ? -32768 : l);
