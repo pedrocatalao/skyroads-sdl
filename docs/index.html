@@ -51,6 +51,12 @@
                  3px 3px 0 #3a1466;
     letter-spacing: 2px;
   }
+  h1 .sdl {
+    display: inline-block; vertical-align: super;
+    font-size: .32em; margin-left: 10px; padding: 5px 8px;
+    color: #0a0618; background: var(--cyan); text-shadow: none;
+    border: 2px solid #fff; box-shadow: 0 0 14px rgba(64,224,255,.6), 3px 3px 0 #133;
+  }
   .tagline { color: var(--cyan); font-size: 26px; text-shadow: 0 0 10px rgba(64,224,255,.5); }
   .sub { color: var(--dim); margin-top: 6px; }
 
@@ -117,7 +123,7 @@
 
 <header>
   <img class="logo" src="icon-256.png" alt="SkyRoads ship icon" width="128" height="128">
-  <h1>SKYROADS</h1>
+  <h1>SKYROADS<span class="sdl">SDL</span></h1>
   <div class="tagline">The 1993 DOS space racer — reborn as a native port</div>
   <div class="sub">macOS &amp; Linux &nbsp;·&nbsp; C + SDL2 &nbsp;·&nbsp; no emulation, no DOSBox</div>
 
