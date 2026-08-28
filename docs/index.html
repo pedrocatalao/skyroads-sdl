@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkyRoads SDL — the 1993 DOS classic, natively on your machine</title>
+<meta name="description" content="Native cross-platform port of SkyRoads (Bluemoon Interactive, 1993) in C + SDL2. macOS and Linux. No emulation, no DOSBox.">
+<meta property="og:title" content="SkyRoads SDL">
+<meta property="og:description" content="The 1993 DOS space racer, ported natively to macOS and Linux. Free download.">
+<meta property="og:image" content="https://pedrocatalao.github.io/skyroads-sdl/title-crt.png">
+<link rel="icon" href="icon-256.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #06040f;
+    --road: #b060ff;       /* skyroads purple */
+    --cyan: #40e0ff;
+    --amber: #ffc040;
+    --text: #cfd4ff;
+    --dim: #7a7fa8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    line-height: 1.45;
+    overflow-x: hidden;
+  }
+  #stars { position: fixed; inset: 0; z-index: 0; }
+  /* CRT scanlines over everything, very subtle */
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: 3; pointer-events: none;
+    background: repeating-linear-gradient(to bottom,
+      transparent 0 2px, rgba(0,0,0,.18) 2px 3px);
+  }
+  main { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; padding: 0 20px; }
+
+  header { text-align: center; padding: 72px 0 40px; }
+  header img.logo { width: 128px; image-rendering: auto; filter: drop-shadow(0 0 24px rgba(176,96,255,.45)); }
+  h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(26px, 6vw, 44px);
+    margin: 28px 0 10px;
+    color: #fff;
+    text-shadow: 0 0 6px var(--road), 0 0 24px rgba(176,96,255,.6),
+                 3px 3px 0 #3a1466;
+    letter-spacing: 2px;
+  }
+  .tagline { color: var(--cyan); font-size: 26px; text-shadow: 0 0 10px rgba(64,224,255,.5); }
+  .sub { color: var(--dim); margin-top: 6px; }
+
+  .buttons { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin: 34px 0 8px; }
+  a.btn {
+    font-family: 'Press Start 2P', monospace; font-size: 13px;
+    color: #0a0618; background: var(--cyan);
+    padding: 16px 20px; text-decoration: none;
+    border: 3px solid #fff; box-shadow: 0 0 18px rgba(64,224,255,.45), 5px 5px 0 #133;
+    transition: transform .08s ease;
+  }
+  a.btn:hover { transform: translate(-2px,-2px); box-shadow: 0 0 26px rgba(64,224,255,.7), 7px 7px 0 #133; }
+  a.btn.alt { background: var(--road); box-shadow: 0 0 18px rgba(176,96,255,.45), 5px 5px 0 #313; }
+  a.btn.alt:hover { box-shadow: 0 0 26px rgba(176,96,255,.7), 7px 7px 0 #313; }
+  .btn small { display: block; font-size: 9px; margin-top: 7px; opacity: .75; }
+  .free { color: var(--amber); text-align: center; font-size: 20px; margin-top: 14px; }
+
+  .crt {
+    margin: 46px auto 10px; max-width: 720px;
+    border: 14px solid #1a1626; border-radius: 14px;
+    box-shadow: 0 0 0 3px #322a4a, 0 0 60px rgba(176,96,255,.25), inset 0 0 30px #000;
+    overflow: hidden; background: #000;
+  }
+  .crt img { display: block; width: 100%; image-rendering: pixelated; }
+  .caption { text-align: center; color: var(--dim); font-size: 18px; }
+
+  section { margin: 64px 0; }
+  h2 {
+    font-family: 'Press Start 2P', monospace; font-size: 18px; color: var(--amber);
+    text-shadow: 2px 2px 0 #5a3a00; margin-bottom: 22px;
+  }
+  h2::before { content: "» "; color: var(--road); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+  .card {
+    border: 2px solid #2b2545; background: rgba(20,14,40,.55); padding: 18px;
+    box-shadow: 4px 4px 0 rgba(0,0,0,.5);
+  }
+  .card b { color: var(--cyan); display: block; margin-bottom: 6px; font-size: 23px; }
+  code, kbd {
+    font-family: 'VT323', monospace; color: var(--amber);
+    background: #171129; padding: 1px 7px; border: 1px solid #322a4a;
+  }
+  pre {
+    background: #0d0a1c; border: 2px solid #2b2545; padding: 16px 18px;
+    overflow-x: auto; box-shadow: 4px 4px 0 rgba(0,0,0,.5); font-size: 20px;
+  }
+  pre code { background: none; border: none; padding: 0; }
+  .keys { width: 100%; border-collapse: collapse; }
+  .keys td { padding: 6px 10px; border-bottom: 1px dashed #2b2545; }
+  .keys td:first-child { color: var(--cyan); white-space: nowrap; }
+  a { color: var(--cyan); }
+  footer {
+    text-align: center; color: var(--dim); font-size: 19px;
+    padding: 30px 0 60px; border-top: 2px dashed #2b2545; margin-top: 70px;
+  }
+  footer a { color: var(--road); }
+  .blink { animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<main>
+
+<header>
+  <img class="logo" src="icon-256.png" alt="SkyRoads ship icon" width="128" height="128">
+  <h1>SKYROADS</h1>
+  <div class="tagline">The 1993 DOS space racer — reborn as a native port</div>
+  <div class="sub">macOS &amp; Linux &nbsp;·&nbsp; C + SDL2 &nbsp;·&nbsp; no emulation, no DOSBox</div>
+
+  <div class="buttons">
+    <a class="btn" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/SkyRoads.zip">
+      ⬇ macOS<small>universal · Apple Silicon &amp; Intel</small></a>
+    <a class="btn alt" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-x86_64.tar.gz">
+      ⬇ Linux x86_64<small>self-contained tarball</small></a>
+    <a class="btn alt" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-arm64.tar.gz">
+      ⬇ Linux ARM64<small>self-contained tarball</small></a>
+  </div>
+  <div class="free">100% free — the game is Bluemoon's freeware, everything bundled<span class="blink">_</span></div>
+</header>
+
+<div class="crt"><img src="gameplay.gif" alt="SkyRoads gameplay: a ship jumping between floating road tiles in space"></div>
+<p class="caption">Real gameplay — bit-exact physics at the original 36.4&nbsp;Hz tick.</p>
+
+<section>
+  <h2>What is this?</h2>
+  <p>
+    <b>SkyRoads</b> (Bluemoon Interactive, 1993) is the legendary DOS game where you
+    pilot a ship over floating roads in space — jumping gaps, dodging obstacles,
+    and running out of oxygen at the worst possible moment. This project ports the
+    <em>original source code</em> to portable C + SDL2, so it runs natively on
+    modern machines: the fixed-point physics are bit-exact, the 3D road renderer was
+    rewritten from the original hand-written x86 assembly, and the AdLib soundtrack
+    plays through a proper OPL2 emulator.
+  </p>
+</section>
+
+<section>
+  <h2>Features</h2>
+  <div class="grid">
+    <div class="card"><b>Faithful physics</b>The original fixed-point math, untouched — same jumps, same speed, same difficulty. If you had the moves in 1993, you still do.</div>
+    <div class="card"><b>Two soundtracks</b>Authentic AdLib FM synthesis by default; press <kbd>F9</kbd> for an "AWE32-style" wavetable mode with sampled instruments.</div>
+    <div class="card"><b>CRT mode</b>Press <kbd>F10</kbd> for scanlines, phosphor trails and smooth scaling — like the monitor you played it on.</div>
+    <div class="card"><b>Truly portable</b>One download, zero installs: game data and SDL2 are bundled. Untar (or unzip) and fly.</div>
+  </div>
+</section>
+
+<section>
+  <h2>Quick start</h2>
+  <p><b style="color:var(--cyan)">macOS:</b> unzip, then right-click → Open the first time (it isn't notarized).</p>
+  <p style="margin-top:12px"><b style="color:var(--cyan)">Linux:</b></p>
+  <pre><code>tar -xzf skyroads-linux-*.tar.gz
+cd skyroads
+./skyroads</code></pre>
+  <p style="margin-top:12px">Or build from source — one script per platform, details in the
+  <a href="https://github.com/pedrocatalao/skyroads-sdl#build-from-source">README</a>.</p>
+</section>
+
+<section>
+  <h2>Controls</h2>
+  <table class="keys">
+    <tr><td>← →</td><td>steer</td></tr>
+    <tr><td>↑ ↓</td><td>accelerate / brake</td></tr>
+    <tr><td>Space</td><td>jump</td></tr>
+    <tr><td>P</td><td>pause</td></tr>
+    <tr><td>F9</td><td>music: AdLib FM ↔ wavetable</td></tr>
+    <tr><td>F10</td><td>CRT effects on / off</td></tr>
+    <tr><td>F11 / Cmd-F</td><td>fullscreen</td></tr>
+  </table>
+</section>
+
+<footer>
+  <p>An unofficial fan port. <b>SkyRoads</b> © Bluemoon Interactive (Ahti Heinla, Jaan Tallinn &amp; team),
+  who distribute the original as freeware — all game content is theirs.</p>
+  <p style="margin-top:10px">
+    <a href="https://github.com/pedrocatalao/skyroads-sdl">★ Source on GitHub</a>
+    &nbsp;·&nbsp; Linux contributions by Timár Csaba
+    &nbsp;·&nbsp; <a href="https://github.com/pedrocatalao/skyroads-sdl/issues">report a bug</a>
+  </p>
+</footer>
+
+</main>
+<script>
+/* flying starfield, SkyRoads style */
+(function () {
+  const c = document.getElementById('stars'), x = c.getContext('2d');
+  let W, H, stars = [];
+  function size() {
+    W = c.width = innerWidth; H = c.height = innerHeight;
+    stars = Array.from({length: Math.min(220, W / 6)}, spawn);
+  }
+  function spawn() {
+    return { x: (Math.random() - .5) * W, y: (Math.random() - .5) * H, z: Math.random() * W };
+  }
+  function tick() {
+    x.fillStyle = 'rgba(6,4,15,.55)'; x.fillRect(0, 0, W, H);
+    for (const s of stars) {
+      s.z -= 2.2;
+      if (s.z <= 1) Object.assign(s, spawn(), { z: W });
+      const k = 128 / s.z, px = s.x * k + W / 2, py = s.y * k + H / 2;
+      if (px < 0 || px >= W || py < 0 || py >= H) { Object.assign(s, spawn(), { z: W }); continue; }
+      const b = 1 - s.z / W;
+      x.fillStyle = `rgba(${180 + 75 * b},${200 + 55 * b},255,${.25 + .75 * b})`;
+      x.fillRect(px, py, b * 2.6 + .4, b * 2.6 + .4);
+    }
+    requestAnimationFrame(tick);
+  }
+  addEventListener('resize', size);
+  size(); tick();
+})();
+</script>
+</body>
+</html>
