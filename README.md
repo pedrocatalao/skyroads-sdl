@@ -69,7 +69,8 @@ cd skyroads-sdl
 ./build/skyroads data
 ```
 
-No prebuilt Linux binaries yet — reports and packaging contributions welcome.
+Verified on Ubuntu (x86_64 and ARM64). No prebuilt Linux binaries yet —
+packaging contributions welcome.
 
 ## Controls
 
