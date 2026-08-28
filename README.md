@@ -55,6 +55,18 @@ cmake --build build --target skyroads
 ./build/skyroads ~/Downloads/skyroads-data
 ```
 
+### Linux
+
+```bash
+sudo apt install build-essential cmake libsdl2-dev curl unzip   # or your distro's equivalent
+git clone https://github.com/pedrocatalao/skyroads-mac.git
+cd skyroads-mac
+./make_linux.sh      # fetches the freeware game data, then builds
+./build/skyroads data
+```
+
+No prebuilt Linux binaries yet — reports and packaging contributions welcome.
+
 ## Controls
 
 | Key | Action |
@@ -86,6 +98,7 @@ cmake --build build --target skyroads
 - `docs/trek_blueprint.md` — reverse-engineering notes on the original
   renderer
 - `make_mac.sh` — builds the signed `SkyRoads.app` bundle
+- `make_linux.sh` — builds the `skyroads` binary on Linux
 - `get_data.sh` — fetches the freeware game data + soundfont (shared by the
   build scripts, or run standalone)
 
@@ -99,8 +112,8 @@ are welcome as [issues](https://github.com/pedrocatalao/skyroads-mac/issues).
 - **More visual effects** — building on the CRT mode (scanlines and
   phosphor trails are in already)
 - **Gamepad support**
-- **Windows and Linux builds** — the code is portable C + SDL2; it's
-  mostly packaging work
+- **Windows build** — the code is portable C + SDL2; it's mostly
+  packaging work (Linux already builds from source)
 - **High-resolution road rendering** — regenerating the renderer's
   perspective geometry at 2–4× (the original art stays pixel-perfect)
 - **Demo/attract mode** — the original's recorded demo playback, not yet
@@ -123,6 +136,8 @@ are welcome as [issues](https://github.com/pedrocatalao/skyroads-mac/issues).
   design are theirs. This is an unofficial fan port, not affiliated with or
   endorsed by Bluemoon; the game itself is distributed by Bluemoon as
   freeware.
+- Linux support contributions by Timár Csaba
+  ([@xcom169](https://github.com/xcom169)).
 - OPL2 FM synthesis via [Nuked-OPL3](https://github.com/nukeykt/Nuked-OPL3)
   (Nuke.YKT), LGPL-2.1 — see `src/opl3.c` for its license header.
 - Wavetable music mode via [TinySoundFont](https://github.com/schellingb/TinySoundFont)

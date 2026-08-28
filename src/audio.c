@@ -12,8 +12,17 @@
 #include <string.h>
 #include <stdio.h>
 
+/* vendored header uses the classic null-pointer offsetof trick; silence
+ * clang's UB warning for it without touching the vendored file */
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wnull-pointer-subtraction"
+#endif
 #define TSF_IMPLEMENTATION
 #include "tsf.h"
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 #include "gm_map.h"
 
 #define ADLTICK_HZ   180.02
