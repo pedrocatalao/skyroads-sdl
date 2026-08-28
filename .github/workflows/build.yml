@@ -39,8 +39,13 @@ jobs:
         run: gh release upload "${{ github.event.release.tag_name }}" build/SkyRoads.zip --clobber
 
   linux:
-    name: Linux (x86_64)
-    runs-on: ubuntu-latest
+    name: Linux (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - { runner: ubuntu-latest,    arch: x86_64 }
+          - { runner: ubuntu-24.04-arm, arch: arm64 }
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
@@ -57,13 +62,13 @@ jobs:
           cmake --build build --target game_sim -j
           ./build/game_sim data | grep -q "SIM OK"
       - name: Package
-        run: tar -czf skyroads-linux-x86_64.tar.gz -C build skyroads
+        run: tar -czf "skyroads-linux-${{ matrix.arch }}.tar.gz" -C build skyroads
       - uses: actions/upload-artifact@v4
         with:
-          name: skyroads-linux-x86_64
-          path: skyroads-linux-x86_64.tar.gz
+          name: skyroads-linux-${{ matrix.arch }}
+          path: skyroads-linux-${{ matrix.arch }}.tar.gz
       - name: Attach to release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" skyroads-linux-x86_64.tar.gz --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" "skyroads-linux-${{ matrix.arch }}.tar.gz" --clobber
