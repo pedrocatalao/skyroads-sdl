@@ -71,8 +71,13 @@
   a.btn:hover { transform: translate(-2px,-2px); box-shadow: 0 0 26px rgba(64,224,255,.7), 7px 7px 0 #133; }
   a.btn.alt { background: var(--road); box-shadow: 0 0 18px rgba(176,96,255,.45), 5px 5px 0 #313; }
   a.btn.alt:hover { box-shadow: 0 0 26px rgba(176,96,255,.7), 7px 7px 0 #313; }
-  a.btn.star { background: var(--amber); box-shadow: 0 0 18px rgba(255,192,64,.45), 5px 5px 0 #331; }
-  a.btn.star:hover { box-shadow: 0 0 26px rgba(255,192,64,.7), 7px 7px 0 #331; }
+  .starline { margin-top: 12px; font-size: 21px; }
+  .starline a {
+    color: var(--amber); text-decoration: none;
+    text-shadow: 0 0 10px rgba(255,192,64,.5);
+    border-bottom: 1px dashed rgba(255,192,64,.5);
+  }
+  .starline a:hover { color: #ffd980; border-bottom-style: solid; }
   .btn small { display: block; font-size: 9px; margin-top: 7px; opacity: .75; }
   .free { color: var(--amber); text-align: center; font-size: 20px; margin-top: 14px; }
 
@@ -128,6 +133,7 @@
   <h1>SKYROADS<span class="sdl">SDL</span></h1>
   <div class="tagline">The 1993 DOS space racer — reborn as a native port</div>
   <div class="sub">macOS &amp; Linux &nbsp;·&nbsp; C + SDL2 &nbsp;·&nbsp; no emulation, no DOSBox</div>
+  <div class="starline"><a href="https://github.com/pedrocatalao/skyroads-sdl">★ <span id="starcount">starred</span> on GitHub — add yours</a></div>
 
   <div class="buttons">
     <a class="btn" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/SkyRoads.zip">
@@ -136,8 +142,6 @@
       ⬇ Linux x86_64<small>self-contained tarball</small></a>
     <a class="btn alt" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-arm64.tar.gz">
       ⬇ Linux ARM64<small>self-contained tarball</small></a>
-    <a class="btn star" href="https://github.com/pedrocatalao/skyroads-sdl">
-      ★ Star it<small id="starcount">on GitHub</small></a>
   </div>
   <div class="free">100% free — the game is Bluemoon's freeware, everything bundled<span class="blink">_</span></div>
 </header>
@@ -237,7 +241,7 @@ fetch('https://api.github.com/repos/pedrocatalao/skyroads-sdl')
   .then(d => {
     if (d && d.stargazers_count != null)
       document.getElementById('starcount').textContent =
-        d.stargazers_count + ' and counting';
+        d.stargazers_count + ' stars';
   })
   .catch(() => {});
 </script>
