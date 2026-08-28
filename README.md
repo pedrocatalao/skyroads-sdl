@@ -2,11 +2,12 @@
   <img src="icon.png" width="180" alt="SkyRoads app icon">
 </p>
 
-# SkyRoads for macOS
+# SkyRoads SDL
 
-A native macOS port of **SkyRoads** (Bluemoon Interactive, 1993) — the classic
-DOS space-racing game — rewritten in portable C with SDL2 and running natively
-on both Apple Silicon and Intel Macs (universal binary). No emulation, no DOSBox.
+A native, cross-platform port of **SkyRoads** (Bluemoon Interactive, 1993) —
+the classic DOS space racer — rewritten in portable C with SDL2. Runs
+natively on macOS (Apple Silicon & Intel, universal binary) and Linux.
+No emulation, no DOSBox.
 
 ![status](https://img.shields.io/badge/status-playable-brightgreen)
 
@@ -22,6 +23,8 @@ first time (the app isn't notarized, so macOS asks once). That's it — the app
 is self-contained.
 
 ## Build from source
+
+### macOS
 
 ```bash
 brew install cmake sdl2
