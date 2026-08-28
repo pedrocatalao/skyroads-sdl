@@ -158,3 +158,6 @@ are welcome as [issues](https://github.com/pedrocatalao/skyroads-sdl/issues).
   (MIT) playing the [TimGM6mb](https://musescore.org) SoundFont (GPL,
   Tim Brechbill), fetched by `get_data.sh` — the instrument mapping was
   reconstructed from the original Sound Club song sources.
+- Licensing is mixed by necessity — the original code is Bluemoon's and
+  carries no open-source license; the port's own scripts and docs are MIT.
+  Details in [LICENSE](LICENSE).

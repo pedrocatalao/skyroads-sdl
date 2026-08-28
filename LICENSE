@@ -1,0 +1,63 @@
+SkyRoads SDL — licensing
+========================
+
+This repository contains an unofficial fan port of SkyRoads (Bluemoon
+Interactive, 1993). It is published for preservation and educational
+purposes. Different parts of it are covered by different terms:
+
+1. Original game code and content
+---------------------------------
+The port's game logic, renderer, audio driver and menu code are derived
+from the original SkyRoads source code, which is copyright (c) Bluemoon
+Interactive (Ahti Heinla, Jaan Tallinn and team). Bluemoon distributes
+the game itself as freeware, but has not released its source code or
+content under any open-source license. Accordingly, NO license — open
+source or otherwise — is granted or implied on those parts or on this
+port of them. All rights in the original work remain with Bluemoon
+Interactive. If Bluemoon objects to any part of this repository, it
+will be taken down on request.
+
+The game data files (roads, art, music, sound effects) are not part of
+this repository. The build scripts fetch them from Bluemoon's official
+freeware release.
+
+2. Port-specific code, build scripts and documentation
+------------------------------------------------------
+The parts of this repository that are original to the port and not
+derived from Bluemoon's work — the build scripts (make_mac.sh,
+make_linux.sh, get_data.sh, CMakeLists.txt), the CI workflows, the
+platform/SDL2 layer, the reverse-engineering notes in docs/, and the
+project website in docs/ — are copyright (c) 2026 Pedro Catalão and
+released under the MIT License:
+
+    Permission is hereby granted, free of charge, to any person
+    obtaining a copy of this software and associated documentation
+    files (the "Software"), to deal in the Software without
+    restriction, including without limitation the rights to use, copy,
+    modify, merge, publish, distribute, sublicense, and/or sell copies
+    of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be
+    included in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+    BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+    ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+3. Third-party components
+-------------------------
+- Nuked-OPL3 (src/opl3.c, src/opl3.h) — copyright (c) Nuke.YKT,
+  licensed under LGPL-2.1. See the license header in src/opl3.c.
+- TinySoundFont (src/tsf.h) — copyright (c) Bernhard Schelling,
+  licensed under the MIT License. See the header in src/tsf.h.
+- TimGM6mb SoundFont — copyright (c) Tim Brechbill, licensed under the
+  GPL; not part of this repository (fetched by get_data.sh).
+
+These components keep their own licenses, which are unaffected by
+anything above.
