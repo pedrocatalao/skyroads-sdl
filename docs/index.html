@@ -71,6 +71,8 @@
   a.btn:hover { transform: translate(-2px,-2px); box-shadow: 0 0 26px rgba(64,224,255,.7), 7px 7px 0 #133; }
   a.btn.alt { background: var(--road); box-shadow: 0 0 18px rgba(176,96,255,.45), 5px 5px 0 #313; }
   a.btn.alt:hover { box-shadow: 0 0 26px rgba(176,96,255,.7), 7px 7px 0 #313; }
+  a.btn.star { background: var(--amber); box-shadow: 0 0 18px rgba(255,192,64,.45), 5px 5px 0 #331; }
+  a.btn.star:hover { box-shadow: 0 0 26px rgba(255,192,64,.7), 7px 7px 0 #331; }
   .btn small { display: block; font-size: 9px; margin-top: 7px; opacity: .75; }
   .free { color: var(--amber); text-align: center; font-size: 20px; margin-top: 14px; }
 
@@ -134,6 +136,8 @@
       ⬇ Linux x86_64<small>self-contained tarball</small></a>
     <a class="btn alt" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-arm64.tar.gz">
       ⬇ Linux ARM64<small>self-contained tarball</small></a>
+    <a class="btn star" href="https://github.com/pedrocatalao/skyroads-sdl">
+      ★ Star it<small id="starcount">on GitHub</small></a>
   </div>
   <div class="free">100% free — the game is Bluemoon's freeware, everything bundled<span class="blink">_</span></div>
 </header>
@@ -227,6 +231,15 @@ cd skyroads
   addEventListener('resize', size);
   size(); tick();
 })();
+/* live star count on the ★ button (fails silently if rate-limited) */
+fetch('https://api.github.com/repos/pedrocatalao/skyroads-sdl')
+  .then(r => r.ok ? r.json() : null)
+  .then(d => {
+    if (d && d.stargazers_count != null)
+      document.getElementById('starcount').textContent =
+        d.stargazers_count + ' and counting';
+  })
+  .catch(() => {});
 </script>
 </body>
 </html>
