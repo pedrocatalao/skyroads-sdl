@@ -61,7 +61,7 @@ jobs:
         run: |
           cmake --build build --target game_sim -j
           ./build/game_sim data | grep -q "SIM OK"
-      - name: Package (self-contained: binary + game data)
+      - name: Package (binary + game data)
         run: |
           mkdir -p dist/skyroads
           cp build/skyroads dist/skyroads/
