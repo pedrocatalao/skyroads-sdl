@@ -13,6 +13,17 @@ int game(int the_end);                 /* game_play.c */
 
 enum { NO_CRASH = 0, ABORT = 7 };
 
+static int has_data(const char *dir) {
+    const char *names[] = { "roads.lzs", "ROADS.LZS" };
+    for (int i = 0; i < 2; i++) {
+        char p[1200];
+        snprintf(p, sizeof p, "%s/%s", dir, names[i]);
+        FILE *f = fopen(p, "rb");
+        if (f) { fclose(f); return 1; }
+    }
+    return 0;
+}
+
 const char *cfg_path(void) {
     static char buf[1200];
     if (!buf[0]) snprintf(buf, sizeof buf, "%sskyroads.cfg", plat_pref_path());
@@ -20,8 +31,18 @@ const char *cfg_path(void) {
 }
 
 int main(int argc, char **argv) {
+    /* data dir: explicit arg, else the exe's dir (mac bundle Resources /
+     * flat layout), else a data/ next to the exe (linux tarball), else
+     * ./data, else cwd */
     const char *base = plat_base_path();
-    set_data_dir(argc > 1 ? argv[1] : (base ? base : "."));
+    static char basedata[1200];
+    if (argc > 1)                    set_data_dir(argv[1]);
+    else if (base && has_data(base)) set_data_dir(base);
+    else if (base && (snprintf(basedata, sizeof basedata, "%sdata", base),
+                      has_data(basedata)))
+                                     set_data_dir(basedata);
+    else if (has_data("data"))       set_data_dir("data");
+    else                             set_data_dir(".");
     if (plat_init("SkyRoads", 3) != 0) {
         fprintf(stderr, "SDL init failed\n");
         return 1;

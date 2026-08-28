@@ -61,8 +61,12 @@ jobs:
         run: |
           cmake --build build --target game_sim -j
           ./build/game_sim data | grep -q "SIM OK"
-      - name: Package
-        run: tar -czf "skyroads-linux-${{ matrix.arch }}.tar.gz" -C build skyroads
+      - name: Package (self-contained: binary + game data)
+        run: |
+          mkdir -p dist/skyroads
+          cp build/skyroads dist/skyroads/
+          cp -r data dist/skyroads/data
+          tar -czf "skyroads-linux-${{ matrix.arch }}.tar.gz" -C dist skyroads
       - uses: actions/upload-artifact@v4
         with:
           name: skyroads-linux-${{ matrix.arch }}
