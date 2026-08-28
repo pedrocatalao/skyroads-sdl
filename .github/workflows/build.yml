@@ -1,0 +1,69 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write        # needed to attach assets on release events
+
+jobs:
+  macos:
+    name: macOS (universal .app)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache game data
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: skyroads-data-v1
+      - name: Build SkyRoads.app
+        run: ./make_mac.sh
+      - name: Verify universal binary
+        run: lipo -archs build/SkyRoads.app/Contents/MacOS/skyroads | grep -q "x86_64 arm64"
+      - name: Zip app (preserving symlinks)
+        run: cd build && zip -r -y SkyRoads.zip SkyRoads.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SkyRoads-macOS
+          path: build/SkyRoads.zip
+      - name: Attach to release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" build/SkyRoads.zip --clobber
+
+  linux:
+    name: Linux (x86_64)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential cmake libsdl2-dev curl unzip
+      - name: Cache game data
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: skyroads-data-v1
+      - name: Build (make_linux.sh)
+        run: ./make_linux.sh
+      - name: Engine smoke test (physics sim)
+        run: |
+          cmake --build build --target game_sim -j
+          ./build/game_sim data | grep -q "SIM OK"
+      - name: Package
+        run: tar -czf skyroads-linux-x86_64.tar.gz -C build skyroads
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skyroads-linux-x86_64
+          path: skyroads-linux-x86_64.tar.gz
+      - name: Attach to release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" skyroads-linux-x86_64.tar.gz --clobber
