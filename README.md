@@ -10,13 +10,14 @@ natively on macOS (Apple Silicon & Intel, universal binary) and Linux.
 No emulation, no DOSBox.
 
 ![status](https://img.shields.io/badge/status-playable-brightgreen)
+[![build](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/build.yml/badge.svg)](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/build.yml)
 
 <p align="center">
   <img src="screenshots/gameplay.gif" width="49%" alt="Gameplay: flying and jumping on road one">
   <img src="screenshots/title-crt.png" width="49%" alt="Title screen with CRT effects (F10)">
 </p>
 
-## [Download SkyRoads for macOS here!](https://github.com/pedrocatalao/skyroads-mac/releases/latest/download/SkyRoads.zip)
+## [Download SkyRoads for macOS here!](https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/SkyRoads.zip)
 
 Unzip, move `SkyRoads.app` anywhere you like, and **right-click → Open** the
 first time (the app isn't notarized, so macOS asks once). That's it — the app
@@ -28,8 +29,8 @@ is self-contained.
 
 ```bash
 brew install cmake sdl2
-git clone https://github.com/pedrocatalao/skyroads-mac.git
-cd skyroads-mac
+git clone https://github.com/pedrocatalao/skyroads-sdl.git
+cd skyroads-sdl
 ./make_mac.sh        # fetches the freeware game data, then builds the app
 open build/SkyRoads.app
 ```
@@ -62,8 +63,8 @@ cmake --build build --target skyroads
 
 ```bash
 sudo apt install build-essential cmake libsdl2-dev curl unzip   # or your distro's equivalent
-git clone https://github.com/pedrocatalao/skyroads-mac.git
-cd skyroads-mac
+git clone https://github.com/pedrocatalao/skyroads-sdl.git
+cd skyroads-sdl
 ./make_linux.sh      # fetches the freeware game data, then builds
 ./build/skyroads data
 ```
@@ -108,7 +109,7 @@ No prebuilt Linux binaries yet — reports and packaging contributions welcome.
 ## Roadmap
 
 Ideas being considered — no promises, no dates. Opinions and requests
-are welcome as [issues](https://github.com/pedrocatalao/skyroads-mac/issues).
+are welcome as [issues](https://github.com/pedrocatalao/skyroads-sdl/issues).
 
 - **Online leaderboards** — per-road finish times, plus efficiency boards
   (least fuel / oxygen used)
