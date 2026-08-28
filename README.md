@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="icon.png" width="180" alt="SkyRoads app icon">
+  <img src="icon.png" width="200" alt="SkyRoads app icon">
 </p>
 
 # SkyRoads SDL
