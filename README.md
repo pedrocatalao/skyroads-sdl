@@ -17,11 +17,20 @@ No emulation, no DOSBox.
   <img src="screenshots/title-crt.png" width="49%" alt="Title screen with CRT effects (F10)">
 </p>
 
-## [Download SkyRoads for macOS here!](https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/SkyRoads.zip)
+## Download
 
-Unzip, move `SkyRoads.app` anywhere you like, and **right-click → Open** the
-first time (the app isn't notarized, so macOS asks once). That's it — the app
-is self-contained.
+- **[macOS](https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/SkyRoads.zip)** —
+  universal app (Apple Silicon & Intel). Unzip, move `SkyRoads.app` anywhere
+  you like, and **right-click → Open** the first time (the app isn't
+  notarized, so macOS asks once).
+- **Linux** —
+  [x86_64](https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-x86_64.tar.gz) ·
+  [ARM64](https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-arm64.tar.gz).
+  `tar -xzf skyroads-linux-*.tar.gz && cd skyroads && ./skyroads` — no
+  packages to install (SDL2 is bundled; built on Ubuntu 24.04, needs a
+  comparably recent glibc).
+
+All downloads are self-contained — the freeware game data is included.
 
 ## Build from source
 
@@ -66,11 +75,11 @@ sudo apt install build-essential cmake libsdl2-dev curl unzip   # or your distro
 git clone https://github.com/pedrocatalao/skyroads-sdl.git
 cd skyroads-sdl
 ./make_linux.sh      # fetches the freeware game data, then builds
-./build/skyroads data
+./build/skyroads
 ```
 
-Verified on Ubuntu (x86_64 and ARM64). No prebuilt Linux binaries yet —
-packaging contributions welcome.
+Verified on Ubuntu (x86_64 and ARM64); prebuilt binaries for both are on the
+[releases page](https://github.com/pedrocatalao/skyroads-sdl/releases/latest).
 
 ## Controls
 

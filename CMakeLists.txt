@@ -35,6 +35,11 @@ target_link_libraries(asset_test PRIVATE SDL2::SDL2)
 add_executable(skyroads ${CORE_SRC} src/assets.c src/menus.c src/audio.c src/opl3.c src/render.c src/game_play.c src/main.c)
 target_include_directories(skyroads PRIVATE src)
 target_link_libraries(skyroads PRIVATE SDL2::SDL2 m)
+if(UNIX AND NOT APPLE)
+    # Look for a bundled SDL2 in lib/ next to the binary first (the release
+    # tarball ships one); fall back to the system SDL2 otherwise.
+    target_link_options(skyroads PRIVATE "-Wl,-rpath,\$ORIGIN/lib")
+endif()
 
 add_executable(trek_test src/compat.c src/assets_headless.c src/render.c src/trek_test.c)
 target_include_directories(trek_test PRIVATE src)
