@@ -1,0 +1,69 @@
+name: Windows
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write        # needed to attach assets on release events
+
+jobs:
+  build:
+    name: Windows (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - { runner: windows-latest, arch: x86_64, msystem: UCRT64,     prefix: mingw-w64-ucrt-x86_64 }
+          - { runner: windows-11-arm, arch: arm64,  msystem: CLANGARM64, prefix: mingw-w64-clang-aarch64 }
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: ${{ matrix.msystem }}
+          update: true
+          install: >-
+            git curl unzip zip
+            ${{ matrix.prefix }}-toolchain
+            ${{ matrix.prefix }}-cmake
+            ${{ matrix.prefix }}-ninja
+            ${{ matrix.prefix }}-SDL2
+      - name: Cache game data
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: skyroads-data-v1
+      - name: Fetch game data
+        run: ./get_data.sh data
+      - name: Build
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --target skyroads
+      - name: Engine smoke test (physics sim)
+        run: |
+          cmake --build build --target game_sim
+          ./build/game_sim data | grep -q "SIM OK"
+      - name: Package (exe + DLLs + game data)
+        run: |
+          mkdir -p dist/skyroads
+          cp build/skyroads.exe dist/skyroads/
+          # bundle every non-system DLL the exe needs (SDL2 + MinGW runtime)
+          ldd build/skyroads.exe | grep -iv "system32" | awk '{print $3}' | sort -u | xargs -I{} cp {} dist/skyroads/
+          cp -r data dist/skyroads/data
+          cd dist && zip -r "../skyroads-windows-${{ matrix.arch }}.zip" skyroads
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skyroads-windows-${{ matrix.arch }}
+          path: skyroads-windows-${{ matrix.arch }}.zip
+      - name: Attach to release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" "skyroads-windows-${{ matrix.arch }}.zip" --clobber

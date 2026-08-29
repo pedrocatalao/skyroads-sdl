@@ -10,7 +10,9 @@ natively on macOS (Apple Silicon & Intel, universal binary) and Linux.
 No emulation, no DOSBox.
 
 ![status](https://img.shields.io/badge/status-playable-brightgreen)
-[![build](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/build.yml/badge.svg)](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/build.yml)
+[![macOS](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/macos.yml/badge.svg)](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/macos.yml)
+[![Linux](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/linux.yml/badge.svg)](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/linux.yml)
+[![Windows](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/windows.yml/badge.svg)](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/windows.yml)
 
 <p align="center">
   <img src="screenshots/gameplay.gif" width="49%" alt="Gameplay: flying and jumping on road one">

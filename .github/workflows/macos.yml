@@ -1,0 +1,39 @@
+name: macOS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write        # needed to attach assets on release events
+
+jobs:
+  build:
+    name: macOS (universal .app)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache game data
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: skyroads-data-v1
+      - name: Build SkyRoads.app
+        run: ./make_mac.sh
+      - name: Verify universal binary
+        run: lipo -archs build/SkyRoads.app/Contents/MacOS/skyroads | grep -q "x86_64 arm64"
+      - name: Zip app (preserving symlinks)
+        run: cd build && zip -r -y SkyRoads.zip SkyRoads.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SkyRoads-macOS
+          path: build/SkyRoads.zip
+      - name: Attach to release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ github.event.release.tag_name }}" build/SkyRoads.zip --clobber
