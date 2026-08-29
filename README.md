@@ -21,7 +21,7 @@ Windows (x86_64 & ARM64). No emulation, no DOSBox.
 
 ## Download
 
-- **[macOS](https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/SkyRoads.zip)** —
+- **[macOS](https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-macos-universal.zip)** —
   universal app (Apple Silicon & Intel). Unzip, move `SkyRoads.app` anywhere
   you like, and **right-click → Open** the first time (the app isn't
   notarized, so macOS asks once).

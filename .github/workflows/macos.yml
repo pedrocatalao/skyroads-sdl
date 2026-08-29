@@ -27,13 +27,13 @@ jobs:
       - name: Verify universal binary
         run: lipo -archs build/SkyRoads.app/Contents/MacOS/skyroads | grep -q "x86_64 arm64"
       - name: Zip app (preserving symlinks)
-        run: cd build && zip -r -y SkyRoads.zip SkyRoads.app
+        run: cd build && zip -r -y skyroads-macos-universal.zip SkyRoads.app
       - uses: actions/upload-artifact@v4
         with:
-          name: SkyRoads-macOS
-          path: build/SkyRoads.zip
+          name: skyroads-macos-universal
+          path: build/skyroads-macos-universal.zip
       - name: Attach to release
         if: github.event_name == 'release'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ github.event.release.tag_name }}" build/SkyRoads.zip --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" build/skyroads-macos-universal.zip --clobber
