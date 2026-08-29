@@ -60,7 +60,8 @@
   .tagline { color: var(--cyan); font-size: 26px; text-shadow: 0 0 10px rgba(64,224,255,.5); }
   .sub { color: var(--dim); margin-top: 6px; }
 
-  .buttons { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin: 34px 0 8px; }
+  .buttons { display: flex; flex-direction: column; gap: 14px; align-items: center; margin: 34px 0 8px; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
   a.btn {
     font-family: 'Press Start 2P', monospace; font-size: 13px;
     color: #0a0618; background: var(--cyan);
@@ -138,16 +139,22 @@
   <div class="starline"><a href="https://github.com/pedrocatalao/skyroads-sdl">★ <span id="starcount">starred</span> on GitHub — add yours</a></div>
 
   <div class="buttons">
-    <a class="btn" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/SkyRoads.zip">
-      ⬇ macOS<small>universal · Apple Silicon &amp; Intel</small></a>
-    <a class="btn alt" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-x86_64.tar.gz">
-      ⬇ Linux x86_64<small>self-contained tarball</small></a>
-    <a class="btn alt" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-arm64.tar.gz">
-      ⬇ Linux ARM64<small>self-contained tarball</small></a>
-    <a class="btn win" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-windows-x86_64.zip">
-      ⬇ Windows x86_64<small>self-contained zip</small></a>
-    <a class="btn win" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-windows-arm64.zip">
-      ⬇ Windows ARM64<small>self-contained zip</small></a>
+    <div class="btn-row">
+      <a class="btn" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/SkyRoads.zip">
+        ⬇ macOS<small>universal · Apple Silicon &amp; Intel</small></a>
+    </div>
+    <div class="btn-row">
+      <a class="btn alt" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-x86_64.tar.gz">
+        ⬇ Linux x86_64<small>self-contained tarball</small></a>
+      <a class="btn alt" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-arm64.tar.gz">
+        ⬇ Linux ARM64<small>self-contained tarball</small></a>
+    </div>
+    <div class="btn-row">
+      <a class="btn win" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-windows-x86_64.zip">
+        ⬇ Windows x86_64<small>self-contained zip</small></a>
+      <a class="btn win" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-windows-arm64.zip">
+        ⬇ Windows ARM64<small>self-contained zip</small></a>
+    </div>
   </div>
   <div class="free">100% free — the game is Bluemoon's freeware, everything bundled<span class="blink">_</span></div>
 </header>
