@@ -29,7 +29,8 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ${{ matrix.msystem }}
-          update: true
+          # no `update:` — the pinned base install is fine for CI and much
+          # faster; the action's built-in cache (default on) does the rest
           install: >-
             git curl unzip zip
             ${{ matrix.prefix }}-toolchain
