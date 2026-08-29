@@ -16,6 +16,7 @@ jobs:
     name: Linux (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
     strategy:
+      fail-fast: false     # one arch failing must not cancel the other
       matrix:
         include:
           - { runner: ubuntu-latest,    arch: x86_64 }

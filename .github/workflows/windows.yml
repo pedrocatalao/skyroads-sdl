@@ -16,6 +16,7 @@ jobs:
     name: Windows (${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
     strategy:
+      fail-fast: false     # one arch failing must not cancel the other
       matrix:
         include:
           - { runner: windows-latest, arch: x86_64, msystem: UCRT64,     prefix: mingw-w64-ucrt-x86_64 }
