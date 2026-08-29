@@ -6,8 +6,8 @@
 
 A native, cross-platform port of **SkyRoads** (Bluemoon Interactive, 1993) —
 the classic DOS space racer — rewritten in portable C with SDL2. Runs
-natively on macOS (Apple Silicon & Intel, universal binary) and Linux.
-No emulation, no DOSBox.
+natively on macOS (Apple Silicon & Intel, universal binary), Linux and
+Windows (x86_64 & ARM64). No emulation, no DOSBox.
 
 ![status](https://img.shields.io/badge/status-playable-brightgreen)
 [![macOS](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/macos.yml/badge.svg)](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/macos.yml)
@@ -31,6 +31,11 @@ No emulation, no DOSBox.
   `tar -xzf skyroads-linux-*.tar.gz && cd skyroads && ./skyroads` — no
   packages to install (SDL2 is bundled; built on Ubuntu 24.04, needs a
   comparably recent glibc).
+- **Windows** —
+  [x86_64](https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-windows-x86_64.zip) ·
+  [ARM64](https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-windows-arm64.zip).
+  Unzip and double-click `skyroads.exe` — SDL2 and the runtime DLLs are
+  bundled, nothing to install.
 
 All downloads are self-contained — the freeware game data is included.
 
@@ -83,6 +88,23 @@ cd skyroads-sdl
 Verified on Ubuntu (x86_64 and ARM64); prebuilt binaries for both are on the
 [releases page](https://github.com/pedrocatalao/skyroads-sdl/releases/latest).
 
+### Windows
+
+Install [MSYS2](https://www.msys2.org), open the **MSYS2 UCRT64** shell
+(or **CLANGARM64** on ARM machines) and:
+
+```bash
+pacman -S --needed git curl unzip mingw-w64-ucrt-x86_64-toolchain mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja mingw-w64-ucrt-x86_64-SDL2
+git clone https://github.com/pedrocatalao/skyroads-sdl.git
+cd skyroads-sdl
+./get_data.sh data
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --target skyroads
+./build/skyroads.exe
+```
+
+(On ARM, use the `mingw-w64-clang-aarch64-*` package names instead.)
+
 ## Controls
 
 | Key | Action |
@@ -128,8 +150,6 @@ are welcome as [issues](https://github.com/pedrocatalao/skyroads-sdl/issues).
 - **More visual effects** — building on the CRT mode (scanlines and
   phosphor trails are in already)
 - **Gamepad support**
-- **Windows build** — the code is portable C + SDL2; it's mostly
-  packaging work (Linux already builds from source)
 - **High-resolution road rendering** — regenerating the renderer's
   perspective geometry at 2–4× (the original art stays pixel-perfect)
 - **Demo/attract mode** — the original's recorded demo playback, not yet

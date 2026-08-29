@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SkyRoads SDL — the 1993 DOS classic, natively on your machine</title>
-<meta name="description" content="Native cross-platform port of SkyRoads (Bluemoon Interactive, 1993) in C + SDL2. macOS and Linux. No emulation, no DOSBox.">
+<meta name="description" content="Native cross-platform port of SkyRoads (Bluemoon Interactive, 1993) in C + SDL2. macOS, Linux and Windows. No emulation, no DOSBox.">
 <meta property="og:title" content="SkyRoads SDL">
-<meta property="og:description" content="The 1993 DOS space racer, ported natively to macOS and Linux. Free download.">
+<meta property="og:description" content="The 1993 DOS space racer, ported natively to macOS, Linux and Windows. Free download.">
 <meta property="og:image" content="https://pedrocatalao.github.io/skyroads-sdl/title-crt.png">
 <link rel="icon" href="icon-256.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -71,6 +71,8 @@
   a.btn:hover { transform: translate(-2px,-2px); box-shadow: 0 0 26px rgba(64,224,255,.7), 7px 7px 0 #133; }
   a.btn.alt { background: var(--road); box-shadow: 0 0 18px rgba(176,96,255,.45), 5px 5px 0 #313; }
   a.btn.alt:hover { box-shadow: 0 0 26px rgba(176,96,255,.7), 7px 7px 0 #313; }
+  a.btn.win { background: var(--amber); box-shadow: 0 0 18px rgba(255,192,64,.45), 5px 5px 0 #331; }
+  a.btn.win:hover { box-shadow: 0 0 26px rgba(255,192,64,.7), 7px 7px 0 #331; }
   .starline { margin-top: 12px; font-size: 21px; }
   .starline a {
     color: var(--amber); text-decoration: none;
@@ -132,7 +134,7 @@
   <img class="logo" src="icon-256.png" alt="SkyRoads ship icon" width="128" height="128">
   <h1>SKYROADS<span class="sdl">SDL</span></h1>
   <div class="tagline">The 1993 DOS space racer — reborn as a native port</div>
-  <div class="sub">macOS &amp; Linux &nbsp;·&nbsp; C + SDL2 &nbsp;·&nbsp; no emulation, no DOSBox</div>
+  <div class="sub">macOS · Linux · Windows &nbsp;—&nbsp; C + SDL2, no emulation, no DOSBox</div>
   <div class="starline"><a href="https://github.com/pedrocatalao/skyroads-sdl">★ <span id="starcount">starred</span> on GitHub — add yours</a></div>
 
   <div class="buttons">
@@ -142,6 +144,10 @@
       ⬇ Linux x86_64<small>self-contained tarball</small></a>
     <a class="btn alt" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-arm64.tar.gz">
       ⬇ Linux ARM64<small>self-contained tarball</small></a>
+    <a class="btn win" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-windows-x86_64.zip">
+      ⬇ Windows x86_64<small>self-contained zip</small></a>
+    <a class="btn win" href="https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-windows-arm64.zip">
+      ⬇ Windows ARM64<small>self-contained zip</small></a>
   </div>
   <div class="free">100% free — the game is Bluemoon's freeware, everything bundled<span class="blink">_</span></div>
 </header>
@@ -179,7 +185,8 @@
   <pre><code>tar -xzf skyroads-linux-*.tar.gz
 cd skyroads
 ./skyroads</code></pre>
-  <p style="margin-top:12px">Or build from source — one script per platform, details in the
+  <p style="margin-top:12px"><b style="color:var(--cyan)">Windows:</b> unzip, double-click <code>skyroads.exe</code>. That's it.</p>
+  <p style="margin-top:12px">Or build from source — details in the
   <a href="https://github.com/pedrocatalao/skyroads-sdl#build-from-source">README</a>.</p>
 </section>
 
