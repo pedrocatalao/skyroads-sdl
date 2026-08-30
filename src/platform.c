@@ -1,4 +1,5 @@
 #include "platform.h"
+#include <stdlib.h>
 #include <SDL.h>
 #include "font8.h"
 
@@ -64,6 +65,8 @@ int plat_init(const char *title, int scale) {
     tick_origin = plat_now();
     return 0;
 }
+
+void plat_exit(int code) { exit(code); }
 
 void plat_quit(void) {
     if (tex) SDL_DestroyTexture(tex);

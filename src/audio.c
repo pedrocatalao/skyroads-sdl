@@ -8,7 +8,9 @@
 #include "assets.h"
 #include "platform.h"
 #include "opl3.h"
+#if !SKY_CORE
 #include <SDL.h>
+#endif
 #include <string.h>
 #include <stdio.h>
 
@@ -59,7 +61,18 @@ static uint8_t PercKey, Delay, ChnIns[11];
 uint8_t Adl_Event;
 static duint Playing_Song = (duint)-1;
 static uint8_t musbuf[16000];
+/* Locking: the standalone build uses SDL's mutex; the DXM core must link no
+ * SDL at all (PORTING.md §3.5), so it uses pthreads directly. */
+#if SKY_CORE
+#include <pthread.h>
+static pthread_mutex_t core_lock = PTHREAD_MUTEX_INITIALIZER;
+#define SDL_LockMutex(m)    pthread_mutex_lock(&core_lock)
+#define SDL_UnlockMutex(m)  pthread_mutex_unlock(&core_lock)
+#define SDL_CreateMutex()   NULL
+static void *lock;
+#else
 static SDL_mutex *lock;
+#endif
 
 /* ---- wavetable ("AWE32") backend: TinySoundFont over the same events ---- */
 static tsf *wt;                       /* NULL if no soundfont found */
@@ -203,7 +216,7 @@ static void adltick(void) {                         /* adlib.asm:320 */
 /* ---- SDL mixing ---- */
 static double tick_accum;
 
-static void audio_cb(void *ud, Uint8 *stream, int len) {
+static void audio_cb(void *ud, uint8_t *stream, int len) {
     (void)ud;
     int16_t *out = (int16_t *)stream;
     int frames = len / 4;                           /* stereo s16 */
@@ -252,7 +265,29 @@ static void wt_toggle(void) {
     SDL_UnlockMutex(lock);
 }
 
+/* Reset every mutable audio static between runs (PORTING.md §3.2). */
+void audio_reset_state(void) {
+#if !SKY_CORE
+    if (!lock) return;              /* called before audio_init on first run */
+#endif
+    SDL_LockMutex(lock);
+    pcm_buf = NULL; pcm_len = 0; pcm_pos_fx = 0;
+    Playing_Song = (duint)-1;
+    Song_Ptr = Loop_Ptr = NULL; Ins_Ptr = NULL;
+    Delay = 0; PercKey = 0;
+    SDL_UnlockMutex(lock);
+}
+
 void audio_init(void) {
+    static int inited;
+    if (inited) {                 /* re-init would leak the soundfont and race
+                                   * the host's audio thread mid-render */
+        audio_reset_state();
+        OPL3_Reset(&chip, SAMPLE_RATE);
+        adl_init_locked();
+        return;
+    }
+    inited = 1;
     lock = SDL_CreateMutex();
     char sf[1200];
     snprintf(sf, sizeof sf, "%s/TimGM6mb.sf2", sky_data_dir());
@@ -266,14 +301,19 @@ void audio_init(void) {
     for (int i = 0; i < 11; i++) { wt_note[i] = -1; wt_vel[i] = 0.85f; }
     OPL3_Reset(&chip, SAMPLE_RATE);
     adl_init_locked();
+#if SKY_CORE
+    /* No device here — the host owns the one audio device and pulls frames
+     * via sky_audio_render() (PORTING.md §2.5). */
+#else
     SDL_AudioSpec want = {0}, have;
     want.freq = SAMPLE_RATE;
     want.format = AUDIO_S16SYS;
     want.channels = 2;
     want.samples = 512;
-    want.callback = audio_cb;
+    want.callback = (SDL_AudioCallback)audio_cb;
     SDL_AudioDeviceID dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
     if (dev) SDL_PauseAudioDevice(dev, 0);
+#endif
 }
 
 /* sbdma(buf,len,smprate): SB time constant tc -> rate = 1000000/(256-tc) */
@@ -326,3 +366,12 @@ void stop_song(void) {
     Playing_Song = (duint)-1;
     SDL_UnlockMutex(lock);
 }
+
+#if SKY_CORE
+/* Host-pulled audio: DXM calls this from its own device callback.  Pull, not
+ * push — the game already renders on demand, so pushing would only add a
+ * buffer and its latency. */
+void sky_audio_render(int16_t *out, int nframes) {
+    audio_cb(NULL, (uint8_t *)out, nframes * 2 * (int)sizeof(int16_t));
+}
+#endif

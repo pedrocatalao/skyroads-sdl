@@ -23,16 +23,40 @@ else()
     find_package(SDL2 REQUIRED CONFIG)
 endif()
 
+# GAME_SRC — the portable game logic.  Dependency-free: no SDL, no windowing,
+# no audio device (PORTING.md §3.5).  Shared verbatim by the standalone build
+# and the DXM core; only the platform.h implementation differs.
+set(GAME_SRC
+    src/compat.c src/assets.c src/menus.c src/audio.c src/opl3.c
+    src/render.c src/game_play.c src/sky_run.c
+)
+
 set(CORE_SRC
     src/compat.c
     src/platform.c
 )
 
+# SKY_CORE=ON builds GAME_SRC as a static library for DOS ex Machina instead
+# of the standalone executable.  No main.c, no platform.c, no SDL.
+option(SKY_CORE "Build the DXM core static library instead of the game" OFF)
+set(SKY_DXM_INCLUDE "" CACHE PATH "Path to DXM's src/ (for dxm_core.h)")
+
+if(SKY_CORE)
+    if(NOT SKY_DXM_INCLUDE)
+        message(FATAL_ERROR "SKY_CORE=ON requires -DSKY_DXM_INCLUDE=<dxm>/src")
+    endif()
+    add_library(skyroads_core STATIC ${GAME_SRC} src/dxm_entry.c)
+    target_include_directories(skyroads_core PUBLIC src "${SKY_DXM_INCLUDE}")
+    target_compile_definitions(skyroads_core PUBLIC SKY_CORE=1)
+    target_link_libraries(skyroads_core PRIVATE m)
+    return()
+endif()
+
 add_executable(asset_test ${CORE_SRC} src/main_test.c)
 target_include_directories(asset_test PRIVATE src)
 target_link_libraries(asset_test PRIVATE SDL2::SDL2)
 
-add_executable(skyroads ${CORE_SRC} src/assets.c src/menus.c src/audio.c src/opl3.c src/render.c src/game_play.c src/main.c)
+add_executable(skyroads ${GAME_SRC} src/platform.c src/main.c)
 target_include_directories(skyroads PRIVATE src)
 target_link_libraries(skyroads PRIVATE SDL2::SDL2 m)
 if(UNIX AND NOT APPLE)

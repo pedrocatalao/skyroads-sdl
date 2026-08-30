@@ -40,7 +40,7 @@ void check_error(void) {
     if (SysErr) {
         fprintf(stderr, SysErr == NO_MEM ? "Not enough memory\n"
                                          : "Error loading data files (code %d)\n", SysErr);
-        exit(1);
+        plat_exit(1);
     }
 }
 
@@ -150,7 +150,7 @@ void mix_picture(const pic_t *p) {
  * Original busy-waits on the PIT tick; here every wait pumps SDL and
  * presents, so the window stays live and the fade is visible. */
 static void idle_frame(void) {
-    if (!plat_pump()) exit(0);
+    if (!plat_pump()) plat_exit(0);
     plat_tick_update();
     plat_present();
 }
@@ -337,3 +337,16 @@ void save_cfg(void) {
     SysErr = 0;
 }
 
+/* PORTING.md §3.2: plat_exit() longjmps out of the game's blocking loops, so
+ * the matching free_memory() calls never run and Segs never returns to 0.  A
+ * second run then exhausts Alloc[] and check_error() reports "Not enough
+ * memory".  Reclaim everything explicitly before each run. */
+void assets_reset_state(void) {
+    while (Segs > 0) {
+        Segs--;
+        if (Alloc[Segs] != 1) xfree(Alloc[Segs]);
+    }
+    g_file = 0;
+    Bk_Seg = Dest_Seg = 0;
+    Trans_Cols = Prot_Cols = 0;
+}

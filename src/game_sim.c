@@ -1,3 +1,4 @@
+#include <stdlib.h>
 /* game_sim.c — headless smoke test for the game_play.c physics port.
  * Follows the assets_headless.c pattern: defines the plat_* stubs, then
  * includes assets.c.  Loads road 1, holds UP for 200 physics ticks, prints
@@ -26,6 +27,7 @@ static int started, ticks_run, esc_now, false_crash;
 const char *cfg_path(void) { return "skyroads.cfg"; }
 
 int  plat_pump(void)     { return 1; }
+void plat_exit(int c) { exit(c); }
 void plat_present(void)  {}
 int  plat_getch(void)    { return 0; }
 int  plat_getch_ext(void){ return 0; }

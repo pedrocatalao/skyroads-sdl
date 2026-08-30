@@ -17,7 +17,7 @@ enum { KEY_ESC = 27, KEY_RET = 13, KEY_UP = 0x148, KEY_DOWN = 0x150,
 /* blocking getch on top of SDL — keeps original control flow */
 static int mgetch(void) {
     for (;;) {
-        if (!plat_pump()) exit(0);
+        if (!plat_pump()) plat_exit(0);
         plat_tick_update();
         plat_present();
         int c = plat_getch_ext();
@@ -290,7 +290,7 @@ duint main_menu(duint draw) {                      /* intro.c:622 */
         switch (mgetch()) {
         case KEY_UP:   if (i) i--; break;
         case KEY_DOWN: if (i < 2) i++; break;
-        case KEY_ESC:  exit(0);
+        case KEY_ESC:  plat_exit(0);
         case KEY_RET:
             fade(menu_palette, 0, FADE_TIME);
             if (!i) goto end;
