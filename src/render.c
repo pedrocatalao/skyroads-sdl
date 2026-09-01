@@ -8,6 +8,7 @@
 
 #include "render_tables.h"
 
+
 enum { LINE0 = 32, MINX = 110, MAXX = MINX + 319,
        CARW = 29, CARH = 24, GROUNDZ = 80,
        MINZ = GROUNDZ - CARH - 36, MAXZ = MINZ - 1 + 138,
@@ -38,6 +39,101 @@ static const duint *g_cell;           /* current Road_Dat cell */
 static const uint16_t *g_tab;         /* 6 index entries for (vrow,col) */
 
 #define RTYPE(w) (((w) >> 8) & 0xf)
+
+/* ---- span guard (build with -DSKY_GUARD) --------------------------------
+ * Every span drawelm() writes is data-driven: `base` comes out of the record
+ * stream and climbs 320 a row until a 0xff terminator.  So the moment a walk
+ * desyncs - REC() landing off the expanded phase block, or a record chain
+ * skipped by the wrong number of bytes - `base` grows without bound and the
+ * memset runs off the end of the page, and eventually off the arena.  That
+ * is a SIGBUS with the whole story already gone from the stack.
+ *
+ * Three checks: the span stays inside the page; roadrow stays inside
+ * Road_Dat; and the expanded phase blocks are both VALID when expand()
+ * finishes and UNCHANGED every frame after.  The last two separate the only
+ * two ways a record pointer comes out garbage - built wrong, or written
+ * over later. */
+#ifdef SKY_GUARD
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "compat.h"
+uint32_t arena_brk_dbg(void);
+static long g_pagelim;                    /* writable bytes from Page */
+static int  g_roadrow, g_vrow, g_col, g_elm;
+/* DXM runs fullscreen, so stderr is easy to lose behind the app; every
+ * report goes to a file as well. */
+static FILE *g_lg;
+#define GLOG(...) do { if(!g_lg) g_lg=fopen("/tmp/sky_guard.log","w"); \
+                       fprintf(stderr,__VA_ARGS__); \
+                       if(g_lg) fprintf(g_lg,__VA_ARGS__); } while(0)
+#define GEND()    do { fflush(stderr); \
+                       if(g_lg){ fflush(g_lg); fclose(g_lg); g_lg=NULL; } \
+                       abort(); } while(0)
+static uint8_t g_canary[PHASES][INDEXSIZE];
+static int     g_canary_set;
+static void guard_fail(long off,int w,const uint8_t *rec,int base,int x2,int c){
+    GLOG("\n*** SKY_GUARD: span leaves the page ***\n"
+      "  write [%ld,%ld) into a page of %ld bytes  (over by %ld)\n"
+      "  base=%d x2=%d w=%d colour=%d Side=%d\n"
+      "  roadrow=%d vrow=%d col=%d elm=%d\n"
+      "  record at +%ld of the phase block (records start at +%d)\n"
+      "  Page=+%ld, es=Page+%d, phase block at +%ld, brk=%u\n",
+      off,off+w,g_pagelim,off+w-g_pagelim,
+      base,x2,w,c,Side,g_roadrow,g_vrow,g_col,g_elm,
+      (long)(rec-g_ph),INDEXSIZE,(long)(Page-g_arena),LINE0*320,
+      (long)(g_ph-g_arena),(unsigned)arena_brk_dbg());
+    GLOG("  g_tab:");
+    for (int k=0;k<6;k++) GLOG(" %u",(unsigned)g_tab[k]);
+    GLOG("\n  cell=%04x front=%04x side=%04x\n",
+         (unsigned)*g_cell,(unsigned)g_cell[-COLS],
+         (unsigned)g_cell[Side?-1:+1]);
+    GEND();
+}
+/* called once expand() has run over every phase block */
+static void guard_check_expanded(void){
+    for (int p = 0; p < PHASES; p++) {
+        const uint8_t  *blk = seg_ptr(PicDatSegments[p]);
+        const uint16_t *ix  = (const uint16_t *)blk;
+        for (int k = 0; k < INDEXSIZE/2; k++)
+            if (ix[k] < INDEXSIZE) {
+                GLOG("*** SKY_GUARD: phase %d index[%d]=%u is below "
+                     "INDEXSIZE %d straight out of expand()\n"
+                     "  -> the block was NOT expanded from raw data "
+                     "(expanded twice?)\n  block at +%ld, brk=%u\n",
+                     p,k,(unsigned)ix[k],INDEXSIZE,
+                     (long)(blk-g_arena),(unsigned)arena_brk_dbg());
+                GEND();
+            }
+        memcpy(g_canary[p], blk, INDEXSIZE);
+    }
+    g_canary_set = 1;
+    GLOG("SKY_GUARD: %d phase blocks expanded and snapshotted, brk=%u\n",
+         PHASES,(unsigned)arena_brk_dbg());
+    if (g_lg) { fflush(g_lg); fclose(g_lg); g_lg=NULL; }
+}
+/* called every frame, before anything reads the index */
+static void guard_check_canary(int ph){
+    if (!g_canary_set) return;
+    if (memcmp(g_canary[ph], g_ph, INDEXSIZE) == 0) return;
+    int k = 0;
+    while (k < INDEXSIZE && g_canary[ph][k] == g_ph[k]) k++;
+    GLOG("*** SKY_GUARD: phase %d index table CLOBBERED ***\n"
+         "  first difference at +%d: was %02x, now %02x\n"
+         "  block at +%ld, brk=%u, Page=+%ld\n"
+         "  -> something was allocated over the phase blocks\n",
+         ph,k,g_canary[ph][k],g_ph[k],
+         (long)(g_ph-g_arena),(unsigned)arena_brk_dbg(),
+         (long)(Page-g_arena));
+    GEND();
+}
+#  define GUARD_SPAN(off,w,rec,base,x2,c) \
+     do { long o_=(long)(LINE0*320)+(long)(off); \
+          if(o_<0 || o_+(long)(w)>g_pagelim) \
+              guard_fail(o_,(int)(w),(rec),(base),(x2),(c)); } while(0)
+#else
+#  define GUARD_SPAN(off,w,rec,base,x2,c) ((void)0)
+#endif
 
 /* ---- initvid: expand phase blocks + build ColInfo/XLimits ---- */
 static void expand(uint8_t *blk) {                 /* trek.asm:1966-2001 */
@@ -74,6 +170,9 @@ void initvid(void) {
     }
     memset(XLimits, 0, sizeof XLimits);
     memcpy(XLimits + 129, XLimits9, 9);
+#ifdef SKY_GUARD
+    guard_check_expanded();
+#endif
 }
 
 /* ---- span drawing (vgadrwl/vgadrwr) ---- */
@@ -88,8 +187,9 @@ static const uint8_t *drawelm(const uint8_t *rec, int color) {
         if (x2 == 0xff) return rec;
         uint8_t w = *rec++; rec++;
         if (w) {
-            if (!Side) memset(es + base - x2, c, w);
-            else       memset(es + base + x2 - w, c, w);
+            int off = Side ? (base + x2 - w) : (base - x2);
+            GUARD_SPAN(off, w, rec, base, x2, c);
+            memset(es + off, c, w);
         }
         base += 320;
     }
@@ -236,11 +336,18 @@ void video(int x, int y, int z, const uint8_t *carptr,
     (void)car_inside_tunnel;
     X = x; Y = y; Z = z; CarPtr = carptr; ShadowH = surface_relative_z;
     Page = seg_ptr(page_seg);
+#ifdef SKY_GUARD
+    /* the caller allocates exactly one viewport: 320 * (MAXZ-MINZ+1) */
+    g_pagelim = 320L * (MAXZ - MINZ + 1);
+#endif
 
     /* background restore: full copy of the viewport (sky + road area) */
     memcpy(Page, seg_ptr(Background_Seg), 320 * (MAXZ - MINZ + 1));
 
     g_ph = seg_ptr(PicDatSegments[Y & (PHASES - 1)]);
+#ifdef SKY_GUARD
+    guard_check_canary(Y & (PHASES - 1));
+#endif
     g_index = (const uint16_t *)g_ph;
     int roadrow = (Y >> PHAS) + (ROWS - GROUNDROWS);
     int Half = 0;
@@ -255,6 +362,18 @@ void video(int x, int y, int z, const uint8_t *carptr,
                 g_cell = &Road_Dat[roadrow][col];
                 g_tab = &g_index[(vrow * (COLS / 2 + 1) + c) * 6];
                 int t = RTYPE(*g_cell);
+#ifdef SKY_GUARD
+                g_roadrow = roadrow; g_vrow = vrow; g_col = col; g_elm = t;
+                /* Road_Dat has 8 zeroed guard rows below and 24 above; past
+                 * those we are reading whatever global follows it, and the
+                 * types that come back drive the record walk. */
+                if (roadrow < -8 || roadrow >= MAX_STAGE_LEN + 24) {
+                    GLOG("*** SKY_GUARD: roadrow %d out of Road_Dat "
+                         "[-8,%d)  (Y=%d vrow=%d)\n",
+                         roadrow, MAX_STAGE_LEN+24, Y, vrow);
+                    GEND();
+                }
+#endif
                 if (t < 6) ElmDraw[t]();
             }
         if (Rows == GROUNDROWS && Half == 0) {
