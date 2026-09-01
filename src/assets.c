@@ -349,4 +349,26 @@ void assets_reset_state(void) {
     g_file = 0;
     Bk_Seg = Dest_Seg = 0;
     Trans_Cols = Prot_Cols = 0;
+    /* Every segment handle that outlives a run has to be dropped along with
+     * the memory it names.  The rollback above moves arena_brk back below
+     * these blocks, so the second run hands the SAME addresses out again -
+     * and anything still holding an old segment then writes through
+     * whatever has been allocated over it.
+     *
+     * Sample_Seg was the live case.  load_trekdat only allocates it
+     * `if (!Sample_Seg)`, so on a second run it was skipped and kept
+     * pointing at what had by then become an expanded phase block; loading
+     * sfx.snd and intro.snd wrote SMP_LEN bytes straight through that
+     * block's index table.  The record pointers that came out of it sent
+     * drawelm() writing off the end of its page - and, given a big enough
+     * bogus offset, off the end of the arena.  The standalone build cannot
+     * hit this: plat_exit() is exit() there, so there is never a run two. */
+    Sample_Seg = 0;
+    Background_Seg = 0;
+    Cars_Seg = 0;
+    Src_Seg = 0;
+    Line_Len = 0;
+    Dash_Pic = (pic_t){0};
+    for (int i = 0; i < 16; i++) PicDatSegments[i] = 0;
+    arena_reset();
 }
