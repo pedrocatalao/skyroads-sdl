@@ -79,6 +79,7 @@ jobs:
           path: build-core/skyroads.dxm
       - name: Attach module to release
         if: github.event_name == 'release'
+        shell: bash          # runner's own bash — gh isn't on the MSYS2 PATH
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
