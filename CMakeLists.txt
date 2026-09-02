@@ -54,11 +54,43 @@ set(CORE_SRC
 # the two copies drifting is a refusal at startup, not a mystery later.
 set(SKY_DXM_INCLUDE "" CACHE PATH "DXM's src/, if building against a checkout")
 
+# CORE_DXM_SRC — the game, plus the two files that make it a DXM core.
+# src/dxm_platform.c is the shared adapter, vendored here for the same reason
+# dxm_core.h is: a module has to build with no DXM checked out.  It belongs
+# INSIDE the core rather than in the shell, because a loadable module cannot
+# reach back into the host executable for the fourteen plat_* symbols it
+# needs - that back-linking is fragile on Unix and impossible on Windows.
+set(CORE_DXM_SRC ${GAME_SRC} src/dxm_entry.c src/dxm_platform.c)
+
 if(SKY_CORE)
-    add_library(skyroads_core STATIC ${GAME_SRC} src/dxm_entry.c)
+    add_library(skyroads_core STATIC ${CORE_DXM_SRC})
     target_include_directories(skyroads_core PUBLIC "${SKY_DXM_INCLUDE}" src)
     target_compile_definitions(skyroads_core PUBLIC SKY_CORE=1)
     target_link_libraries(skyroads_core PRIVATE m)
+
+    # SKY_MODULE=ON also builds the loadable module DXM downloads and dlopens.
+    # One extension on every platform, because the catalogue names the file.
+    if(SKY_MODULE)
+        add_library(skyroads_module MODULE ${CORE_DXM_SRC})
+        set_target_properties(skyroads_module PROPERTIES
+            OUTPUT_NAME "skyroads" PREFIX "" SUFFIX ".dxm"
+            C_VISIBILITY_PRESET hidden
+            VISIBILITY_INLINES_HIDDEN ON)
+        target_include_directories(skyroads_module PUBLIC "${SKY_DXM_INCLUDE}" src)
+        target_compile_definitions(skyroads_module PUBLIC SKY_CORE=1)
+        target_link_libraries(skyroads_module PRIVATE m)
+        # Fail the BUILD on an unresolved symbol rather than the dlopen: a
+        # module that quietly expects the host to supply something is exactly
+        # the failure this design exists to prevent.
+        if(APPLE)
+            # erroring on an undefined symbol is already the default here,
+            # and asking for it explicitly is deprecated
+        elseif(WIN32)
+            target_link_options(skyroads_module PRIVATE -Wl,--exclude-all-symbols)
+        else()
+            target_link_options(skyroads_module PRIVATE -Wl,--no-undefined)
+        endif()
+    endif()
     return()
 endif()
 

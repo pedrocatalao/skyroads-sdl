@@ -10,8 +10,12 @@
  * where it links a core, which turns drift into a compile error instead of
  * a crash at the first present().  Bump it whenever anything below changes
  * shape; the catalogue manifest carries the same number so DXM can say "this
- * game needs a newer DXM" rather than failing to load it. */
-#define DXM_ABI 1
+ * game needs a newer DXM" rather than failing to load it.
+ *
+ * 2: dxm_host gained lock/unlock.  A core built as a loadable module carries
+ *    the adapter inside it and must link no threading library of its own, so
+ *    the one lock it needs comes from the shell that owns the thread. */
+#define DXM_ABI 2
 
 #define DXM_PIT_HZ 1193182.0    /* 8253 input clock; a port picks its divisor */
 
@@ -59,9 +63,35 @@ typedef struct dxm_host {
     double (*now)(void);            /* monotonic seconds                     */
     void   (*sleep_ms)(int ms);
     void   (*log)(const char *msg);
+    /* The core's one lock, guarding audio state against whoever renders it.
+     * It comes from the shell because the shell owns the thread - and
+     * because a core shipped as a module must not link a threading library
+     * of its own, which is what makes it loadable everywhere. */
+    void   (*lock)(void);
+    void   (*unlock)(void);
     const char *data_dir;
     const char *pref_dir;
 } dxm_host;
+
+/* ---- a core as a loadable module -------------------------------------
+ * A module exports exactly these three symbols and hides everything else,
+ * so two games can be loaded at once without their globals colliding.  The
+ * names are FIXED - the shell resolves them by name, so they cannot carry
+ * the per-port prefix the rest of a port's symbols do (PORTING.md 3.8). */
+#if defined(_WIN32)
+#  define DXM_EXPORT __declspec(dllexport)
+#else
+#  define DXM_EXPORT __attribute__((visibility("default")))
+#endif
+
+#define DXM_SYM_INFO  "dxm_core_get_info"
+#define DXM_SYM_MAIN  "dxm_core_main"
+#define DXM_SYM_AUDIO "dxm_core_audio"
+
+typedef const dxm_core_info *(*dxm_core_get_info_fn)(void);
+typedef int                  (*dxm_core_main_fn)(const dxm_host *h,
+                                                 const char *data_dir);
+typedef void                 (*dxm_core_audio_fn)(int16_t *out, int frames);
 
 /* XT scancodes the shell speaks (PORTING.md §2.3). */
 enum {
@@ -75,8 +105,10 @@ enum {
 void     dxm_adapter_bind(const dxm_host *h);
 jmp_buf *dxm_adapter_exit_target(void);
 
-/* Each core exports these two, prefixed (PORTING.md §3.8). */
-const dxm_core_info *sky_core_info(void);
-int                  sky_core_main(const dxm_host *host, const char *data_dir);
+/* Every core exports exactly these three, under exactly these names - see
+ * DXM_SYM_* above.  They are the only symbols a module makes visible. */
+DXM_EXPORT const dxm_core_info *dxm_core_get_info(void);
+DXM_EXPORT int  dxm_core_main(const dxm_host *host, const char *data_dir);
+DXM_EXPORT void dxm_core_audio(int16_t *out, int frames);
 
 #endif

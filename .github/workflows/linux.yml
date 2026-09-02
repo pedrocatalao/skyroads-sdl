@@ -36,15 +36,35 @@ jobs:
         run: |
           cmake --build build --target game_sim -j
           ./build/game_sim data | grep -q "SIM OK"
-      - name: DXM core builds (SKY_CORE=ON)
-        # Compile-only, and deliberately a SEPARATE build tree: this is the
-        # library DXM links, so it must build with no SDL and no threading
-        # library of its own on every platform the standalone supports.
-        # It compiles against the VENDORED src/dxm_core.h - this repo is
-        # public and DXM's is not, so CI cannot check DXM out to borrow it.
+      - name: Build the DXM core module
+        # A SEPARATE build tree: this is the game as DXM consumes it, so it
+        # must build with no SDL and no threading library of its own on every
+        # platform the standalone supports.  It compiles against the VENDORED
+        # src/dxm_core.h - this repo is public and DXM's is not, so CI cannot
+        # check DXM out to borrow it.
         run: |
-          cmake -S . -B build-core -DSKY_CORE=ON
-          cmake --build build-core --target skyroads_core
+          cmake -S . -B build-core -DSKY_CORE=ON -DSKY_MODULE=ON
+          cmake --build build-core
+      - name: Verify the module is self-contained
+        # A module that expects the host to supply a symbol fails at dlopen,
+        # in front of the user.  Catch it here instead.
+        run: |
+          test -f build-core/skyroads.dxm
+          nm -D --undefined-only build-core/skyroads.dxm | grep -E " (plat_|SDL_|pthread_)" && exit 1
+          nm -D --defined-only build-core/skyroads.dxm | grep -c " T dxm_core_" | grep -qx 3
+          echo "self-contained, 3 entry points"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skyroads-dxm-linux-${{ matrix.arch }}
+          path: build-core/skyroads.dxm
+      - name: Attach module to release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp build-core/skyroads.dxm "skyroads-linux-${{ matrix.arch }}.dxm"
+          gh release upload "${{ github.event.release.tag_name }}" \
+            "skyroads-linux-${{ matrix.arch }}.dxm" --clobber
       - name: Package (binary + game data + bundled SDL2)
         run: |
           mkdir -p dist/skyroads/lib

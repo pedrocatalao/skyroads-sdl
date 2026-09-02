@@ -28,15 +28,38 @@ jobs:
         run: lipo -archs build/SkyRoads.app/Contents/MacOS/skyroads | grep -q "x86_64 arm64"
       - name: Zip app (preserving symlinks)
         run: cd build && zip -r -y skyroads-macos-universal.zip SkyRoads.app
-      - name: DXM core builds (SKY_CORE=ON)
-        # Compile-only, and deliberately a SEPARATE build tree: this is the
-        # library DXM links, so it must build with no SDL and no threading
-        # library of its own on every platform the standalone supports.
-        # It compiles against the VENDORED src/dxm_core.h - this repo is
-        # public and DXM's is not, so CI cannot check DXM out to borrow it.
+      - name: Build the DXM core module
+        # A SEPARATE build tree: this is the game as DXM consumes it, so it
+        # must build with no SDL and no threading library of its own on every
+        # platform the standalone supports.  It compiles against the VENDORED
+        # src/dxm_core.h - this repo is public and DXM's is not, so CI cannot
+        # check DXM out to borrow it.
         run: |
-          cmake -S . -B build-core -DSKY_CORE=ON
-          cmake --build build-core --target skyroads_core
+          cmake -S . -B build-core -DSKY_CORE=ON -DSKY_MODULE=ON \
+                -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64"
+          cmake --build build-core
+      - name: Verify the module is self-contained
+        # A module that expects the host to supply a symbol fails at dlopen,
+        # in front of the user.  Catch it here instead.
+        run: |
+          test -f build-core/skyroads.dxm
+          if nm -u build-core/skyroads.dxm | grep -E "_(plat_|SDL_|pthread_)"; then exit 1; fi
+          test "$(nm -gU build-core/skyroads.dxm | grep -c ' T _dxm_core_')" = 3
+          # universal, to match the .app - one download for both Macs
+          lipo -archs build-core/skyroads.dxm | grep -q "x86_64 arm64"
+          echo "self-contained, universal, 3 entry points"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skyroads-dxm-macos-universal
+          path: build-core/skyroads.dxm
+      - name: Attach module to release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp build-core/skyroads.dxm skyroads-macos-universal.dxm
+          gh release upload "${{ github.event.release.tag_name }}" \
+            skyroads-macos-universal.dxm --clobber
       - uses: actions/upload-artifact@v4
         with:
           name: skyroads-macos-universal

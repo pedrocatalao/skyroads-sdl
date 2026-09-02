@@ -18,9 +18,18 @@ static const dxm_core_info INFO = {
     &MODE_13H, 1, "roads.lzs"
 };
 
-const dxm_core_info *sky_core_info(void) { return &INFO; }
+void sky_audio_render(int16_t *out, int frames);   /* audio.c, SKY_CORE */
 
-int sky_core_main(const dxm_host *host, const char *data_dir) {
+/* The three exported entry points.  Fixed names, because the shell resolves
+ * them by name out of a loaded module; everything else this library contains
+ * is hidden. */
+DXM_EXPORT const dxm_core_info *dxm_core_get_info(void) { return &INFO; }
+
+DXM_EXPORT void dxm_core_audio(int16_t *out, int frames) {
+    sky_audio_render(out, frames);
+}
+
+DXM_EXPORT int dxm_core_main(const dxm_host *host, const char *data_dir) {
     dxm_adapter_bind(host);
     set_data_dir(data_dir);
     sky_reset_state();                       /* PORTING.md §3.2 */
