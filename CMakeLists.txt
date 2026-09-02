@@ -4,13 +4,22 @@ project(skyroads C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wno-unused-parameter -O2")
 
+# SKY_CORE=ON builds GAME_SRC as a static library for DOS ex Machina instead
+# of the standalone executable.  No main.c, no platform.c, no SDL.
+option(SKY_CORE "Build the DXM core static library instead of the game" OFF)
+
 # SKY_SDL2_FRAMEWORK=<path to SDL2.framework>: link the official (universal)
 # SDL2.framework and reference it at @executable_path/../Frameworks — used by
 # make_app.sh for the self-contained release bundle.  Default: Homebrew SDL2,
 # best for development builds.
 set(SKY_SDL2_FRAMEWORK "" CACHE PATH "Path to SDL2.framework for bundled release builds")
 
-if(SKY_SDL2_FRAMEWORK)
+# The core links no SDL at all (PORTING.md 3.5), so a core build must not
+# REQUIRE it to configure either - demanding it here is what broke the CI
+# check on a runner that has the framework but no SDL2 cmake config.
+if(SKY_CORE)
+    # nothing to find
+elseif(SKY_SDL2_FRAMEWORK)
     add_library(sky_sdl2 INTERFACE)
     target_include_directories(sky_sdl2 INTERFACE "${SKY_SDL2_FRAMEWORK}/Headers")
     get_filename_component(_sdl2_fw_dir "${SKY_SDL2_FRAMEWORK}" DIRECTORY)
@@ -36,9 +45,6 @@ set(CORE_SRC
     src/platform.c
 )
 
-# SKY_CORE=ON builds GAME_SRC as a static library for DOS ex Machina instead
-# of the standalone executable.  No main.c, no platform.c, no SDL.
-option(SKY_CORE "Build the DXM core static library instead of the game" OFF)
 # src/dxm_core.h is VENDORED here, because the core has to build without DXM
 # checked out anywhere - this repo is public and DXM is not, so CI cannot go
 # and fetch it.  DXM's own build passes SKY_DXM_INCLUDE and its copy is put
