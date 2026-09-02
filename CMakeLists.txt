@@ -39,14 +39,18 @@ set(CORE_SRC
 # SKY_CORE=ON builds GAME_SRC as a static library for DOS ex Machina instead
 # of the standalone executable.  No main.c, no platform.c, no SDL.
 option(SKY_CORE "Build the DXM core static library instead of the game" OFF)
-set(SKY_DXM_INCLUDE "" CACHE PATH "Path to DXM's src/ (for dxm_core.h)")
+# src/dxm_core.h is VENDORED here, because the core has to build without DXM
+# checked out anywhere - this repo is public and DXM is not, so CI cannot go
+# and fetch it.  DXM's own build passes SKY_DXM_INCLUDE and its copy is put
+# FIRST, so the authoritative header always wins when both are present; the
+# vendored one is what everything else compiles against.  dxm_core.h carries
+# DXM_ABI and the shell refuses a core whose value it does not recognise, so
+# the two copies drifting is a refusal at startup, not a mystery later.
+set(SKY_DXM_INCLUDE "" CACHE PATH "DXM's src/, if building against a checkout")
 
 if(SKY_CORE)
-    if(NOT SKY_DXM_INCLUDE)
-        message(FATAL_ERROR "SKY_CORE=ON requires -DSKY_DXM_INCLUDE=<dxm>/src")
-    endif()
     add_library(skyroads_core STATIC ${GAME_SRC} src/dxm_entry.c)
-    target_include_directories(skyroads_core PUBLIC src "${SKY_DXM_INCLUDE}")
+    target_include_directories(skyroads_core PUBLIC "${SKY_DXM_INCLUDE}" src)
     target_compile_definitions(skyroads_core PUBLIC SKY_CORE=1)
     target_link_libraries(skyroads_core PRIVATE m)
     return()

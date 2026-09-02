@@ -13,6 +13,7 @@ static const dxm_mode MODE_13H = {
 };
 
 static const dxm_core_info INFO = {
+    DXM_ABI,
     "skyroads", "SKYROADS.EXE", "SkyRoads", "BlueMoon Software", 1993,
     &MODE_13H, 1, "roads.lzs"
 };
