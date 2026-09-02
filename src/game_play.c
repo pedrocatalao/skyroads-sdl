@@ -279,7 +279,7 @@ static const uint8_t adjust_display_dat[][26*5]={
 /*************************** SDL frame plumbing *****************************/
 
 static void frame_idle(void) {          /* replaces the PIT interrupt */
-    if (!plat_pump()) exit(0);
+    if (!plat_pump()) plat_exit(0);
     plat_tick_update();
     plat_present();
 }
@@ -874,7 +874,7 @@ static duint game_body(void)
         if ((plat_getch() | 0x20) == 'p') {     /* P: pause/unpause */
             for (;;) {
                 plat_osd("PAUSE");
-                if (!plat_pump()) exit(0);
+                if (!plat_pump()) plat_exit(0);
                 plat_present();
                 int c = plat_getch();
                 if ((c | 0x20) == 'p')

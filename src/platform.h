@@ -23,6 +23,11 @@ int      plat_getch(void);         /* last pressed key (ASCII-ish), 0 if none */
 int      plat_getch_ext(void);     /* like plat_getch but arrows as 0x148/0x150/0x14b/0x14d */
 void     plat_sleep(int ms);
 
+/* Leave the game.  Standalone: exit().  DXM core: longjmp back to the core
+ * entry point so the host process survives (PORTING.md 3.1).  Game code MUST
+ * use this instead of exit(). */
+void     plat_exit(int code);
+
 /* 36.4 Hz "volatile tick" clock — the game's PIT timer (0x19e4 divisor). */
 extern volatile duint Time;
 void plat_tick_update(void);       /* call once per frame to advance Time */

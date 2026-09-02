@@ -7,5 +7,6 @@ int  plat_pump(void);
 void plat_tick_update(void);
 void plat_present(void);
 int  plat_getch(void);
+void plat_exit(int code);
 extern volatile duint Time;
 #endif

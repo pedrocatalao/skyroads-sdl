@@ -20,6 +20,10 @@ static uint32_t arena_brk = 0x10000;           /* seg 0x1000 */
 
 void arena_reset(void) { arena_brk = 0x10000; }
 
+#ifdef SKY_GUARD
+uint32_t arena_brk_dbg(void) { return arena_brk; }
+#endif
+
 duint xalloc(uint32_t bytes) {
     uint32_t need = (bytes + 15u) & ~15u;
     if (arena_brk + need > ((uint32_t)SEG_VGA << 4)) { SysErr = NO_MEM; return 0; }
