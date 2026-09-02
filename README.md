@@ -9,6 +9,9 @@ the classic DOS space racer — rewritten in portable C with SDL2. Runs
 natively on macOS (Apple Silicon & Intel, universal binary), Linux and
 Windows (x86_64 & ARM64). No emulation, no DOSBox.
 
+It also runs inside [DOS ex Machina](https://github.com/pedrocatalao/dos-ex-machina),
+on a simulated 1993 PC — see [below](#also-runs-inside-dos-ex-machina).
+
 ![status](https://img.shields.io/badge/status-playable-brightgreen)
 [![macOS](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/macos.yml/badge.svg)](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/macos.yml)
 [![Linux](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/linux.yml/badge.svg)](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/linux.yml)
@@ -38,6 +41,29 @@ Windows (x86_64 & ARM64). No emulation, no DOSBox.
   bundled, nothing to install.
 
 All downloads are self-contained — the freeware game data is included.
+
+## Also runs inside DOS ex Machina
+
+The same port doubles as a core for **[DOS ex Machina][dxm]** — a
+procedurally-drawn 1993 beige-box PC with a simulated CRT, which boots a DOS
+prompt and runs the game behind the glass. There you do not download anything
+by hand: type `NC` at the prompt, and the machine fetches and installs it.
+
+<p align="center">
+  <img src="screenshots/dxm.jpg" width="80%" alt="SkyRoads running inside DOS ex Machina">
+</p>
+
+The `.dxm` files on the [releases page][rel] are that build — the game as a
+loadable module, one per platform. They are not standalone programs; DXM opens
+them. The standalone game above is unaffected and needs none of it.
+
+Both are built from this repository, from the same sources: `SKY_CORE=ON`
+produces the core, and the game itself is the default target. The contract the
+core satisfies is [PORTING.md][porting].
+
+[dxm]: https://github.com/pedrocatalao/dos-ex-machina
+[rel]: https://github.com/pedrocatalao/skyroads-sdl/releases/latest
+[porting]: https://github.com/pedrocatalao/dos-ex-machina/blob/main/PORTING.md
 
 ## Build from source
 
