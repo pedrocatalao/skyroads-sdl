@@ -60,6 +60,23 @@ jobs:
           ldd build/skyroads.exe | grep -iv "system32" | awk '{print $3}' | sort -u | xargs -I{} cp {} dist/skyroads/
           cp -r data dist/skyroads/data
           cd dist && zip -r "../skyroads-windows-${{ matrix.arch }}.zip" skyroads
+      - name: Checkout DOS ex Machina (for dxm_core.h)
+        uses: actions/checkout@v4
+        with:
+          repository: pedrocatalao/dosexmachina
+          path: .dxm
+      - name: DXM core builds (SKY_CORE=ON)
+        # Compile-only, and deliberately a SEPARATE build tree: this is the
+        # library DXM links, so it must build with no SDL and no threading
+        # library of its own on every platform the standalone supports.
+        # It also doubles as a contract check - if dxm_core.h changes under
+        # us, this is where we find out.  The include path is RELATIVE on
+        # purpose: Windows runs these steps under msys2 bash, where an
+        # expanded ${{ github.workspace }} is a backslash path, and CMake
+        # resolves a relative include against the source dir anyway.
+        run: |
+          cmake -S . -B build-core -DSKY_CORE=ON -DSKY_DXM_INCLUDE=.dxm/src
+          cmake --build build-core --target skyroads_core
       - uses: actions/upload-artifact@v4
         with:
           name: skyroads-windows-${{ matrix.arch }}

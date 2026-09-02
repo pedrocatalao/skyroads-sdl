@@ -23,6 +23,15 @@ int      plat_getch(void);         /* last pressed key (ASCII-ish), 0 if none */
 int      plat_getch_ext(void);     /* like plat_getch but arrows as 0x148/0x150/0x14b/0x14d */
 void     plat_sleep(int ms);
 
+/* The one lock the game needs.  Audio state is touched by the game thread
+ * and by whoever renders audio, so it has to be guarded - but choosing a
+ * threading library is the platform's job, not the game's (PORTING.md 3.5).
+ * Reaching for <pthread.h> here is what made the DXM core unbuildable on
+ * Windows.  Calls before the platform is initialised are no-ops, which is
+ * correct: nothing else is running yet. */
+void     plat_lock(void);
+void     plat_unlock(void);
+
 /* Leave the game.  Standalone: exit().  DXM core: longjmp back to the core
  * entry point so the host process survives (PORTING.md 3.1).  Game code MUST
  * use this instead of exit(). */

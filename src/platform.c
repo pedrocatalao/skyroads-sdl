@@ -7,6 +7,7 @@ static SDL_Window   *win;
 static SDL_Renderer *ren;
 static SDL_Texture  *tex;
 static uint32_t      rgba[VGA_W * VGA_H];
+static SDL_mutex    *audio_lock;
 static unsigned      keymask;
 static int           lastch;
 
@@ -31,8 +32,12 @@ double plat_now(void) {
     return (double)SDL_GetPerformanceCounter() / (double)SDL_GetPerformanceFrequency();
 }
 
+void plat_lock(void)   { if (audio_lock) SDL_LockMutex(audio_lock); }
+void plat_unlock(void) { if (audio_lock) SDL_UnlockMutex(audio_lock); }
+
 int plat_init(const char *title, int scale) {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) return -1;
+    audio_lock = SDL_CreateMutex();
     win = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                            VGA_W * scale, VGA_H * scale * 6 / 5,   /* 4:3 aspect (200->240) */
                            SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_RESIZABLE);

@@ -2,3 +2,5 @@
 build/
 data/
 *.ppm
+build-core/
+.dxm/

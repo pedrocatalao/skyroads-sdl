@@ -61,18 +61,6 @@ static uint8_t PercKey, Delay, ChnIns[11];
 uint8_t Adl_Event;
 static duint Playing_Song = (duint)-1;
 static uint8_t musbuf[16000];
-/* Locking: the standalone build uses SDL's mutex; the DXM core must link no
- * SDL at all (PORTING.md §3.5), so it uses pthreads directly. */
-#if SKY_CORE
-#include <pthread.h>
-static pthread_mutex_t core_lock = PTHREAD_MUTEX_INITIALIZER;
-#define SDL_LockMutex(m)    pthread_mutex_lock(&core_lock)
-#define SDL_UnlockMutex(m)  pthread_mutex_unlock(&core_lock)
-#define SDL_CreateMutex()   NULL
-static void *lock;
-#else
-static SDL_mutex *lock;
-#endif
 
 /* ---- wavetable ("AWE32") backend: TinySoundFont over the same events ---- */
 static tsf *wt;                       /* NULL if no soundfont found */
@@ -220,7 +208,7 @@ static void audio_cb(void *ud, uint8_t *stream, int len) {
     (void)ud;
     int16_t *out = (int16_t *)stream;
     int frames = len / 4;                           /* stereo s16 */
-    SDL_LockMutex(lock);
+    plat_lock();
     int use_wt = wt && wt_on;
     for (int i = 0; i < frames; ) {
         tick_accum += ADLTICK_HZ / SAMPLE_RATE;
@@ -251,31 +239,28 @@ static void audio_cb(void *ud, uint8_t *stream, int len) {
         out[i * 2]     = (int16_t)(l > 32767 ? 32767 : l < -32768 ? -32768 : l);
         out[i * 2 + 1] = (int16_t)(r > 32767 ? 32767 : r < -32768 ? -32768 : r);
     }
-    SDL_UnlockMutex(lock);
+    plat_unlock();
 }
 
 static void wt_toggle(void) {
-    SDL_LockMutex(lock);
+    plat_lock();
     if (wt) {
         wt_on = !wt_on;
         plat_osd(wt_on ? "MUSIC AWE32" : "MUSIC ADLIB");
         tsf_note_off_all(wt);
         for (int i = 0; i < 11; i++) wt_note[i] = -1;
     }
-    SDL_UnlockMutex(lock);
+    plat_unlock();
 }
 
 /* Reset every mutable audio static between runs (PORTING.md §3.2). */
 void audio_reset_state(void) {
-#if !SKY_CORE
-    if (!lock) return;              /* called before audio_init on first run */
-#endif
-    SDL_LockMutex(lock);
+    plat_lock();
     pcm_buf = NULL; pcm_len = 0; pcm_pos_fx = 0;
     Playing_Song = (duint)-1;
     Song_Ptr = Loop_Ptr = NULL; Ins_Ptr = NULL;
     Delay = 0; PercKey = 0;
-    SDL_UnlockMutex(lock);
+    plat_unlock();
 }
 
 void audio_init(void) {
@@ -288,7 +273,6 @@ void audio_init(void) {
         return;
     }
     inited = 1;
-    lock = SDL_CreateMutex();
     char sf[1200];
     snprintf(sf, sizeof sf, "%s/TimGM6mb.sf2", sky_data_dir());
     wt = tsf_load_filename(sf);
@@ -318,24 +302,24 @@ void audio_init(void) {
 
 /* sbdma(buf,len,smprate): SB time constant tc -> rate = 1000000/(256-tc) */
 void sbdma(const uint8_t *buf, uint32_t len, duint smprate) {
-    SDL_LockMutex(lock);
+    plat_lock();
     uint32_t rate = smprate > 255 ? smprate : 1000000u / (256u - smprate);
     pcm_buf = buf;
     pcm_len = len;
     pcm_pos_fx = 0;
     pcm_step = (uint32_t)((uint64_t)rate * 65536 / SAMPLE_RATE);
-    SDL_UnlockMutex(lock);
+    plat_unlock();
 }
 
-void sbstop(void) { SDL_LockMutex(lock); pcm_buf = NULL; SDL_UnlockMutex(lock); }
+void sbstop(void) { plat_lock(); pcm_buf = NULL; plat_unlock(); }
 
 /* ---- play_song (intro.c:996) — real implementation ---- */
 void play_song(duint songnr) {
     struct { duint offset, instruments, songlen; } hdr;
     if (Playing_Song == songnr) return;
-    SDL_LockMutex(lock);
+    plat_lock();
     adl_stop_locked();
-    SDL_UnlockMutex(lock);
+    plat_unlock();
     if (cfg.silence) return;
     int h = xopenr("muzax.lzs");
     if (SysErr) { SysErr = 0; return; }
@@ -346,14 +330,14 @@ void play_song(duint songnr) {
     if (hdr.songlen < sizeof musbuf) {
         extr_lzss(musbuf, hdr.songlen);
         if (!SysErr) {
-            SDL_LockMutex(lock);
+            plat_lock();
             adl_init_locked();
             Ins_Ptr = musbuf;
             Song_Ptr = Loop_Ptr = musbuf + hdr.instruments * 16;
             Adl_Event = 0;
             Delay = 0;
             Playing_Song = songnr;
-            SDL_UnlockMutex(lock);
+            plat_unlock();
         }
     }
     xclose(h);
@@ -361,10 +345,10 @@ void play_song(duint songnr) {
 }
 
 void stop_song(void) {
-    SDL_LockMutex(lock);
+    plat_lock();
     adl_stop_locked();
     Playing_Song = (duint)-1;
-    SDL_UnlockMutex(lock);
+    plat_unlock();
 }
 
 #if SKY_CORE
