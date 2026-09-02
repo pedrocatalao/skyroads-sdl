@@ -33,7 +33,7 @@ jobs:
           # faster; the action's built-in cache (default on) does the rest
           install: >-
             git curl unzip zip
-            ${{ matrix.prefix }}-toolchain
+            ${{ matrix.prefix }}-cc
             ${{ matrix.prefix }}-cmake
             ${{ matrix.prefix }}-ninja
             ${{ matrix.prefix }}-SDL2
