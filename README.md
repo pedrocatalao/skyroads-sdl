@@ -180,6 +180,11 @@ are welcome as [issues](https://github.com/pedrocatalao/skyroads-sdl/issues).
   perspective geometry at 2–4× (the original art stays pixel-perfect)
 - **Demo/attract mode** — the original's recorded demo playback, not yet
   ported
+- **SkyRoads Xmas Special** — Bluemoon's 1994 holiday edition (30 more
+  roads, festive art and music), also freeware; same engine, so it's
+  mostly data-loading work
+- **Road editor** — build and play your own roads; the road format is
+  fully decoded (see `docs/`)
 
 ## Troubleshooting
 
