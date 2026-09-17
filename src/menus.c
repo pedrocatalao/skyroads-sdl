@@ -14,6 +14,31 @@
 enum { KEY_ESC = 27, KEY_RET = 13, KEY_UP = 0x148, KEY_DOWN = 0x150,
        KEY_LEFT = 0x14b, KEY_RIGHT = 0x14d };
 
+#include "font8.h"
+
+/* 8x8 text straight into VGA memory, with a 1px drop shadow.  Colors are
+ * picked from the live palette (brightest/darkest of the first 128 entries)
+ * so the hint reads on any menu art without claiming palette slots. */
+static void text8(duint tx, duint ty, const char *s) {
+    duint best = 15, worst = 0, bmax = 0, bmin = (duint)-1;
+    for (duint i = 0; i < 128; i++) {
+        duint v = (duint)menu_palette[i][0] + menu_palette[i][1] + menu_palette[i][2];
+        if (v > bmax) { bmax = v; best = i; }
+        if (v < bmin) { bmin = v; worst = i; }
+    }
+    uint8_t *vga = vga_mem();
+    for (; *s; s++, tx += 8) {
+        const uint8_t *g = font8_glyph(*s);
+        if (!g) continue;
+        for (duint r = 0; r < 8; r++)
+            for (duint c = 0; c < 8; c++)
+                if (g[r] & (0x80u >> c)) {
+                    vga[(ty + r + 1) * 320 + tx + c + 1] = (uint8_t)worst;
+                    vga[(ty + r) * 320 + tx + c] = (uint8_t)best;
+                }
+    }
+}
+
 /* blocking getch on top of SDL — keeps original control flow */
 static int mgetch(void) {
     for (;;) {
@@ -283,14 +308,30 @@ duint main_menu(duint draw) {                      /* intro.c:622 */
     fade_palette(&fadepal1, &fadepal2, 50);
     free_memory();
 
+    duint ret = MM_PLAY;
     i = 0;
     for (;;) {
         init_mix(bkgrpic.seg, SEG_VGA, 1, 0);
         mix_picture(&menu[i]);
+        /* native additions live as plain key hints for now (placement TBD) */
+        if (xmas_available || sky_xmas)
+            text8(16, 190, sky_xmas ? "X - CLASSIC" : "X - XMAS");
+        text8(224, 190, "E - EDITOR");
         switch (mgetch()) {
         case KEY_UP:   if (i) i--; break;
         case KEY_DOWN: if (i < 2) i++; break;
         case KEY_ESC:  plat_exit(0);
+        case 'x': case 'X':
+            if (xmas_available || sky_xmas) {
+                fade(menu_palette, 0, FADE_TIME);
+                ret = MM_XMAS;
+                goto end;
+            }
+            break;
+        case 'e': case 'E':
+            fade(menu_palette, 0, FADE_TIME);
+            ret = MM_EDIT;
+            goto end;
         case KEY_RET:
             fade(menu_palette, 0, FADE_TIME);
             if (!i) goto end;
@@ -302,7 +343,7 @@ duint main_menu(duint draw) {                      /* intro.c:622 */
     }
 end:
     free_memory();
-    return 0;
+    return ret;
 }
 
 static void draw_road_cursor(duint nr, duint on, duint bkseg) {  /* intro.c:701 */

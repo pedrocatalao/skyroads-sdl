@@ -12,4 +12,6 @@ void sbdma(const uint8_t *buf, uint32_t len, duint smprate) { (void)buf; (void)l
 void sbstop(void) {}
 void play_song(duint songnr) { (void)songnr; }
 void stop_song(void) {}
+#include "assets.h"
+uint8_t demo_controls[DEMO_CONTROLS];   /* owned by game_play.c in the game */
 #include "assets.c"

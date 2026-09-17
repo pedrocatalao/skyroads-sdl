@@ -37,7 +37,7 @@ endif()
 # and the DXM core; only the platform.h implementation differs.
 set(GAME_SRC
     src/compat.c src/assets.c src/menus.c src/audio.c src/opl3.c
-    src/render.c src/game_play.c src/sky_run.c
+    src/render.c src/game_play.c src/sky_run.c src/editor.c
 )
 
 set(CORE_SRC

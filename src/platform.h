@@ -21,6 +21,7 @@ enum {
 unsigned plat_keys(void);          /* currently-held key mask */
 int      plat_getch(void);         /* last pressed key (ASCII-ish), 0 if none */
 int      plat_getch_ext(void);     /* like plat_getch but arrows as 0x148/0x150/0x14b/0x14d */
+int      plat_shift_down(void);    /* live shift-key state (editor) */
 void     plat_sleep(int ms);
 
 /* The one lock the game needs.  Audio state is touched by the game thread

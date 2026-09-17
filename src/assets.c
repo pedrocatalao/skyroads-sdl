@@ -235,10 +235,19 @@ static void load_display_dat(const char *name, duint *table, duint offs, uint8_t
     xclose(h);
 }
 
+duint sky_xmas;                          /* 1 = running the Xmas Special */
+duint xmas_available;                    /* set by main.c when data/xmas found */
+duint demo_ok;                           /* demo.rec loaded — attract enabled */
+
 void load_data(void) {                             /* intro.c:870 */
     load_display_dat("oxy_disp.dat", oxy_display_offset, OXY_DIVISIONS, &oxy_display_dat);
     load_display_dat("ful_disp.dat", fuel_display_offset, FUEL_DIVISIONS, &fuel_display_dat);
     load_display_dat("speed.dat", speed_display_offset, SPEED_DIVISIONS, &speed_display_dat);
+    duint h = xopenr("demo.rec");                  /* intro.c:875 */
+    demo_ok = !SysErr;
+    xread(h, demo_controls, sizeof demo_controls);
+    norm_sys_err();
+    xclose(h);
 }
 
 void load_game_data(void) {                        /* intro.c:881 */

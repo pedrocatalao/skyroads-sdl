@@ -91,19 +91,30 @@ copy_data() {  # $1 = filename (lowercase), $2 = "required" | "optional"
     cp "$src" "$OUT/Contents/Resources/$1"
 }
 
-for f in trekdat.lzs roads.lzs muzax.lzs cars.lzs dashbrd.lzs \
+DATA_FILES="trekdat.lzs roads.lzs muzax.lzs cars.lzs dashbrd.lzs \
          mainmenu.lzs gomenu.lzs setmenu.lzs helpmenu.lzs intro.lzs \
-         sfx.snd speed.dat oxy_disp.dat ful_disp.dat \
+         sfx.snd speed.dat oxy_disp.dat ful_disp.dat demo.rec \
          world0.lzs world1.lzs world2.lzs world3.lzs world4.lzs \
-         world5.lzs world6.lzs world7.lzs world8.lzs world9.lzs; do
+         world5.lzs world6.lzs world7.lzs world8.lzs world9.lzs"
+for f in $DATA_FILES; do
     copy_data "$f" required
 done
-# not used by the port yet (demo mode)
-for f in anim.lzs intro.snd demo.rec; do
+for f in anim.lzs intro.snd; do
     copy_data "$f" optional
 done
 # wavetable soundfont
 copy_data "TimGM6mb.sf2" optional
+
+# Xmas Special: a complete second data set (fetched by get_data.sh); the
+# main menu offers it (X) when Resources/xmas exists.
+if find "$DATA_DIR/xmas" -maxdepth 1 -iname "roads.lzs" 2>/dev/null | grep -q .; then
+    mkdir -p "$OUT/Contents/Resources/xmas"
+    for f in $DATA_FILES anim.lzs intro.snd; do
+        src=$(find "$DATA_DIR/xmas" -maxdepth 1 -iname "$f" | head -1)
+        [ -n "$src" ] && cp "$src" "$OUT/Contents/Resources/xmas/$f"
+    done
+    echo "bundled: Xmas Special data"
+fi
 
 # app icon
 if [ -f icon.png ]; then

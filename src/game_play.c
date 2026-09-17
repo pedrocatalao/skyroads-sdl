@@ -5,7 +5,8 @@
  * fixed-point layout (x in 65536*slabs, y/z in 128*pixels).
  *
  * Deviations from game.c (all intentional):
- *  - KEYBOARD control only; joystick/mouse/demo-record paths dropped.
+ *  - KEYBOARD + DEMO playback (attract mode); joystick/mouse and the
+ *    RECORD_DEMO dev path dropped.
  *  - Esc aborts immediately (original had a pause + confirm flow).
  *  - Interrupt-driven busy waits replaced by SDL pump / tick / present.
  *  - EGA branches dropped (VGA path only); switch_pages() is a no-op since
@@ -147,6 +148,9 @@ static duint e_speed,e_oxy_disp,e_fuel_disp,e_distance,e_adjusting,
 
 duint adjust_jumps = 1;                 /* sky2.c sets this before game()    */
 duint control_device = KEYBOARD;
+uint8_t demo_controls[DEMO_CONTROLS];   /* demo.rec: 1 byte per 1/40th slab —
+                                         * ver:2 hor:2 jump:1 bitfields; loaded
+                                         * by assets.c load_data() */
 
 static sint ver_control_status, hor_control_status;
 static duint jump_control_status;
@@ -370,7 +374,16 @@ static duint car_inside_tunnel_(dulong x,duint y,duint z)
 
 static void get_controls(void)          /* evaluates *_control_status */
 {
-    unsigned k=plat_keys();             /* KEYBOARD only */
+    if (control_device == DEMO) {       /* game.c:666 — recorded controls,
+                                         * indexed by road position */
+        dulong di = x/(65536L/40);
+        uint8_t b = demo_controls[di < DEMO_CONTROLS ? di : DEMO_CONTROLS-1];
+        ver_control_status  = (sint)((b        & 3u) - 1);
+        hor_control_status  = (sint)(((b >> 2) & 3u) - 1);
+        jump_control_status = (b >> 4) & 1u;
+        return;
+    }
+    unsigned k=plat_keys();             /* KEYBOARD */
     hor_control_status=(sint)(!!(k&K_RIGHT)-!!(k&K_LEFT));
     ver_control_status=(sint)(!!(k&K_UP)-!!(k&K_DOWN));
     jump_control_status=!!(k&K_SPACE);

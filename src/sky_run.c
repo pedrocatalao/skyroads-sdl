@@ -13,12 +13,14 @@ duint gomenu(void);
 duint intro(void);
 int   game(int the_end);               /* game_play.c */
 void  audio_init(void);
+void  editor_session(void);            /* editor.c */
 
 enum { NO_CRASH = 0, ABORT = 7 };
 
 const char *cfg_path(void) {
     static char buf[1200];
-    if (!buf[0]) snprintf(buf, sizeof buf, "%sskyroads.cfg", plat_pref_path());
+    snprintf(buf, sizeof buf, "%s%s", plat_pref_path(),
+             sky_xmas ? "skyxmas.cfg" : "skyroads.cfg");
     return buf;
 }
 
@@ -47,38 +49,66 @@ int sky_run(void) {
     check_error();
     initvid();
 
-    /* Esc during the intro leaves the logo screen up and the menu draws
-     * over it (draw=0); a completed intro faded to black (draw=1). */
-    duint menu_draw = intro() ? 0 : 1;
+    duint menu_draw;
+dem:
+    /* sky2.c:193 — an intro left running to the end starts the recorded
+     * demo (attract mode); Esc during the intro leaves the logo screen up
+     * and the menu draws over it (draw=0). */
+    if (!intro() && demo_ok) {
+        control_device = CTL_DEMO;
+        menu_draw = 1;
+    } else {
+        control_device = CTL_KEYBOARD;
+        menu_draw = 0;
 mm:
-    main_menu(menu_draw);
-    menu_draw = 1;
+        control_device = CTL_KEYBOARD;
+        switch (main_menu(menu_draw)) {
+        case MM_XMAS: return SKY_RESTART_SWAP;  /* main.c swaps edition */
+        case MM_EDIT:
+            menu_draw = 1;
+            editor_session();
+            goto mm;
+        }
+        menu_draw = 1;
+    }
     start_alloc();
     load_game_data();
     for (;;) {
         start_alloc();
-        if (gomenu()) {                /* Esc from road select -> main menu */
-            free_memory();
-            free_memory();
-            goto mm;
+        if (control_device == CTL_DEMO) {          /* sky2.c:203 */
+            road_len = load_road(0);               /* road 0 = the demo road */
+            load_background(0);
+        } else {
+            if (gomenu()) {            /* Esc from road select -> main menu */
+                free_memory();
+                free_memory();
+                goto mm;
+            }
+            /* sky2.c:214-218 — pick a random road song (2..13), avoid repeats */
+            {
+                enum { ROAD_MUSICS = 12 };
+                duint m = (duint)(rand() % ROAD_MUSICS);
+                if (m == last_muzak) m = (m + 1) % ROAD_MUSICS;
+                last_muzak = m;
+                play_song(2 + m);
+            }
+            road_len = load_road(Cur + 1);
+            load_background(Cur / 3);
         }
-        /* sky2.c:214-218 — pick a random road song (2..13), avoid repeats */
-        {
-            enum { ROAD_MUSICS = 12 };
-            duint m = (duint)(rand() % ROAD_MUSICS);
-            if (m == last_muzak) m = (m + 1) % ROAD_MUSICS;
-            last_muzak = m;
-            play_song(2 + m);
-        }
-        road_len = load_road(Cur + 1);
-        load_background(Cur / 3);
         check_error();
         int i;
         duint done = 0;
         for (duint k = 0; k < WORLDS * 3; k++)
             if (cfg.road_completed[k]) done++;
         do {
-            i = game(!cfg.road_completed[Cur] && done == WORLDS * 3 - 1);
+            i = game(control_device != CTL_DEMO &&
+                     !cfg.road_completed[Cur] && done == WORLDS * 3 - 1);
+            if (control_device == CTL_DEMO) {      /* sky2.c:249 */
+                free_memory();
+                free_memory();
+                if (i == ABORT) goto mm;           /* key pressed -> menu */
+                goto dem;                          /* crashed/finished -> intro */
+            }
             if (i == NO_CRASH) {
                 cfg.road_completed[Cur]++;
                 Cur++;

@@ -22,6 +22,22 @@ if ! find "$DEST" -maxdepth 1 -iname "roads.lzs" | grep -q .; then
         || { echo "ERROR: download did not contain the expected game data" >&2; exit 1; }
 fi
 
+# SkyRoads Xmas Special (also Bluemoon freeware) — a complete second data
+# set; the game's main menu offers it (X) when this directory exists.
+if ! find "$DEST/xmas" -maxdepth 1 -iname "roads.lzs" 2>/dev/null | grep -q .; then
+    XURL="http://www.bluemoon.ee/history/skyroads/skyxmas.zip"
+    echo "Downloading SkyRoads Xmas Special (freeware) from $XURL ..."
+    mkdir -p "$DEST/xmas"
+    if curl -fL --progress-bar -o "$DEST/xmas/skyxmas.zip" "$XURL"; then
+        unzip -o -q "$DEST/xmas/skyxmas.zip" -d "$DEST/xmas"
+        rm "$DEST/xmas/skyxmas.zip"
+        find "$DEST/xmas" -maxdepth 1 -iname "roads.lzs" | grep -q . \
+            || echo "warning: skyxmas.zip did not contain the expected data"
+    else
+        echo "warning: Xmas Special fetch failed; the X option will be hidden"
+    fi
+fi
+
 # TimGM6mb SoundFont (GPL, Tim Brechbill / MuseScore) for the wavetable
 # music mode; the game falls back to AdLib FM without it.
 if ! find "$DEST" -maxdepth 1 -iname "TimGM6mb.sf2" | grep -q .; then

@@ -28,17 +28,30 @@ int main(int argc, char **argv) {
      * ./data, else cwd */
     const char *base = plat_base_path();
     static char basedata[1200];
-    if (argc > 1)                    set_data_dir(argv[1]);
-    else if (base && has_data(base)) set_data_dir(base);
+    const char *dd;
+    if (argc > 1)                    dd = argv[1];
+    else if (base && has_data(base)) dd = base;
     else if (base && (snprintf(basedata, sizeof basedata, "%sdata", base),
                       has_data(basedata)))
-                                     set_data_dir(basedata);
-    else if (has_data("data"))       set_data_dir("data");
-    else                             set_data_dir(".");
+                                     dd = basedata;
+    else if (has_data("data"))       dd = "data";
+    else                             dd = ".";
+    set_data_dir(dd);
+
+    /* Xmas Special: a complete second data set in <data>/xmas (fetched by
+     * get_data.sh); the X key on the main menu swaps editions. */
+    static char xdir[1240];
+    snprintf(xdir, sizeof xdir, "%s/xmas", dd);
+    xmas_available = has_data(xdir);
     if (plat_init("SkyRoads", 3) != 0) {
         fprintf(stderr, "SDL init failed\n");
         return 1;
     }
-    sky_reset_state();
-    return sky_run();
+    for (;;) {
+        sky_reset_state();
+        int r = sky_run();
+        if (r != SKY_RESTART_SWAP) return r;
+        sky_xmas = !sky_xmas;              /* X on the main menu */
+        set_data_dir(sky_xmas ? xdir : dd);
+    }
 }

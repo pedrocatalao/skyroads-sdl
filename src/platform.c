@@ -206,15 +206,40 @@ static void key_event(SDL_Keycode k, int down) {
     }
     if (down) {
         keymask |= bit;
-        if (k >= 32 && k < 127) lastch = (int)k;
+        SDL_Keymod m = SDL_GetModState();
+        if (k >= 'a' && k <= 'z' && (m & KMOD_CTRL))
+            lastch = (int)(k - 'a' + 1);            /* DOS Ctrl+letter */
+        else if (k >= 'a' && k <= 'z' && (m & KMOD_ALT)) {
+            /* DOS Alt+letter ext codes — only the ones the editor uses */
+            lastch = (k == 'r') ? 0x113 : (k == 'g') ? 0x122 :
+                     (k == 'b') ? 0x130 : 0;
+        } else if (k >= 32 && k < 127) {
+            lastch = (int)k;
+            if (m & KMOD_SHIFT) {                   /* editor's shifted keys */
+                if (k >= 'a' && k <= 'z') lastch = (int)k - 32;
+                else if (k == ';') lastch = ':';
+                else if (k == '[') lastch = '{';
+                else if (k == ']') lastch = '}';
+                else if (k == '=') lastch = '+';
+                else if (k == '8') lastch = '*';
+            }
+        }
         else if (k == SDLK_ESCAPE) lastch = 27;
         else if (k == SDLK_RETURN) lastch = 13;
         else if (k == SDLK_UP)    lastch = 0x148;
         else if (k == SDLK_DOWN)  lastch = 0x150;
         else if (k == SDLK_LEFT)  lastch = 0x14b;
         else if (k == SDLK_RIGHT) lastch = 0x14d;
+        else if (k == SDLK_HOME)  lastch = 0x147;
+        else if (k == SDLK_END)   lastch = 0x14f;
+        else if (k == SDLK_INSERT) lastch = 0x152;
+        else if (k == SDLK_DELETE) lastch = 0x153;
+        else if (k >= SDLK_F1 && k <= SDLK_F8)      /* F9-F11 stay reserved */
+            lastch = 0x13b + (int)(k - SDLK_F1);
     } else keymask &= ~bit;
 }
+
+int plat_shift_down(void) { return (SDL_GetModState() & KMOD_SHIFT) != 0; }
 
 int plat_getch_ext(void) { return plat_getch(); }
 void plat_sleep(int ms)  { SDL_Delay((Uint32)ms); }

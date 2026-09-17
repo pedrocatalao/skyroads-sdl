@@ -81,6 +81,18 @@ void delay_ticks(duint ticks);
 void clear_keybuf(void);
 
 /* game data */
+#define DEMO_CONTROLS 6398               /* public.h:47 demo_controls_t[6398] */
+extern uint8_t demo_controls[DEMO_CONTROLS];
+extern duint control_device;             /* game_play.c; 0=KEYBOARD 3=DEMO */
+#define CTL_KEYBOARD 0
+#define CTL_DEMO     3
+
+/* main_menu() outcomes (Start = 0, matching the original's fall-through) */
+enum { MM_PLAY = 0, MM_XMAS = 2, MM_EDIT = 3 };
+#define SKY_RESTART_SWAP 100             /* sky_run(): relaunch, other edition */
+extern duint sky_xmas;                   /* 1 = running the Xmas Special */
+extern duint xmas_available;             /* xmas data dir found at startup */
+extern duint demo_ok;                    /* demo.rec loaded — attract enabled */
 void  load_trekdat(void);
 void  load_data(void);
 void  load_game_data(void);
