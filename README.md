@@ -159,12 +159,10 @@ are welcome as [issues](https://github.com/pedrocatalao/skyroads-sdl/issues).
 - **Online leaderboards** — per-road finish times, plus efficiency boards
   (least fuel / oxygen used)
 - **More visual effects** — building on the CRT mode (scanlines and
-  phosphor trails are in already)
+  blur trails are in already)
 - **Gamepad support**
 - **High-resolution road rendering** — regenerating the renderer's
   perspective geometry at 2–4× (the original art stays pixel-perfect)
-- **Demo/attract mode** — the original's recorded demo playback, not yet
-  ported
 ## Troubleshooting
 
 - **"required data file … not found"** — the path you gave `make_mac.sh` must
