@@ -4,13 +4,11 @@
 
 # SkyRoads SDL
 
-A native, cross-platform port of **SkyRoads** (Bluemoon Interactive, 1993) —
-the classic DOS space racer — rewritten in portable C with SDL2. Runs
-natively on macOS (Apple Silicon & Intel, universal binary), Linux and
-Windows (x86_64 & ARM64). No emulation, no DOSBox.
-
-It also runs inside [DOS ex Machina](https://github.com/pedrocatalao/dos-ex-machina),
-on a simulated 1993 PC — see [below](#also-runs-inside-dos-ex-machina).
+A complete native bundle of **SkyRoads** (Bluemoon Interactive, 1993), the
+**SkyRoads Xmas Special** holiday edition, and Bluemoon's original track
+editor — rewritten in portable C with SDL2. Runs natively on macOS (Apple
+Silicon & Intel, universal binary), Linux and Windows (x86_64 & ARM64).
+No emulation, no DOSBox.
 
 ![status](https://img.shields.io/badge/status-playable-brightgreen)
 [![macOS](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/macos.yml/badge.svg)](https://github.com/pedrocatalao/skyroads-sdl/actions/workflows/macos.yml)
@@ -42,28 +40,13 @@ on a simulated 1993 PC — see [below](#also-runs-inside-dos-ex-machina).
 
 All downloads are self-contained — the freeware game data is included.
 
-## Also runs inside DOS ex Machina
+## What's included
 
-The same port doubles as a core for **[DOS ex Machina][dxm]** — a
-procedurally-drawn 1993 beige-box PC with a simulated CRT, which boots a DOS
-prompt and runs the game behind the glass. There you do not download anything
-by hand: type `NC` at the prompt, and the machine fetches and installs it.
-
-<p align="center">
-  <img src="screenshots/dxm.jpg" width="80%" alt="SkyRoads running inside DOS ex Machina">
-</p>
-
-The `.dxm` files on the [releases page][rel] are that build — the game as a
-loadable module, one per platform. They are not standalone programs; DXM opens
-them. The standalone game above is unaffected and needs none of it.
-
-Both are built from this repository, from the same sources: `SKY_CORE=ON`
-produces the core, and the game itself is the default target. The contract the
-core satisfies is [PORTING.md][porting].
-
-[dxm]: https://github.com/pedrocatalao/dos-ex-machina
-[rel]: https://github.com/pedrocatalao/skyroads-sdl/releases/latest
-[porting]: https://github.com/pedrocatalao/dos-ex-machina/blob/main/PORTING.md
+- **SkyRoads** — the original 1993 DOS space racer.
+- **SkyRoads Xmas Special** — Bluemoon's 1994 holiday edition, with 30 more
+  roads, festive art and music.
+- **Track editor** — Bluemoon's own road editor, ported into the native app
+  so you can build and play custom roads.
 
 ## Build from source
 
@@ -78,9 +61,9 @@ open build/SkyRoads.app
 ```
 
 That's it. If the game data isn't in `./data` yet, `get_data.sh` fetches it
-automatically from Bluemoon's official site (the game is their freeware and
-is not part of this repo); `make_mac.sh` then builds a self-contained app
-bundle around it.
+automatically from Bluemoon's official site (the original game and Xmas
+Special are freeware and are not part of this repo); `make_mac.sh` then builds
+a self-contained app bundle around it.
 
 Already have the game files? Point `make_mac.sh` at your folder —
 DOS-style uppercase filenames (`ROADS.LZS`) are fine:
@@ -143,6 +126,8 @@ cmake --build build --target skyroads
 | Esc | abort road / back |
 | F9 | music synth: AdLib FM (OPL2) / wavetable ("AWE32"-style, sampled instruments) |
 | F10 | CRT effects on/off (scanlines, phosphor trails, smooth scaling) |
+| X | switch between SkyRoads and SkyRoads Xmas Special (main menu) |
+| E | open the track editor (main menu) |
 | Cmd-F | fullscreen |
 
 ## What's in this repo
@@ -163,8 +148,8 @@ cmake --build build --target skyroads
   renderer
 - `make_mac.sh` — builds the signed `SkyRoads.app` bundle
 - `make_linux.sh` — builds the `skyroads` binary on Linux
-- `get_data.sh` — fetches the freeware game data + soundfont (shared by the
-  build scripts, or run standalone)
+- `get_data.sh` — fetches the freeware game data sets + soundfont (shared by
+  the build scripts, or run standalone)
 
 ## Roadmap
 
@@ -180,17 +165,12 @@ are welcome as [issues](https://github.com/pedrocatalao/skyroads-sdl/issues).
   perspective geometry at 2–4× (the original art stays pixel-perfect)
 - **Demo/attract mode** — the original's recorded demo playback, not yet
   ported
-- **SkyRoads Xmas Special** — Bluemoon's 1994 holiday edition (30 more
-  roads, festive art and music), also freeware; same engine, so it's
-  mostly data-loading work
-- **Road editor** — build and play your own roads; the road format is
-  fully decoded (see `docs/`)
-
 ## Troubleshooting
 
 - **"required data file … not found"** — the path you gave `make_mac.sh` must
   contain the SkyRoads data files (`trekdat.lzs`, `roads.lzs`, `world*.lzs`,
-  …). Point it at the folder where you unzipped the freeware download.
+  …). Point it at the folder where you unzipped the freeware download. The
+  Xmas Special lives in `data/xmas` when fetched by `get_data.sh`.
 - **CMake can't find SDL2** — `brew install sdl2`, then delete
   `build/` and rebuild.
 - **Intel Macs** — the app is a universal binary and runs natively on
@@ -198,11 +178,11 @@ are welcome as [issues](https://github.com/pedrocatalao/skyroads-sdl/issues).
 
 ## Credits & legal
 
-- **SkyRoads** was created by **Bluemoon Interactive** (Ahti Heinla,
-  Jaan Tallinn, and team). All game content, art, music and the original
-  design are theirs. This is an unofficial fan port, not affiliated with or
-  endorsed by Bluemoon; the game itself is distributed by Bluemoon as
-  freeware.
+- **SkyRoads** and **SkyRoads Xmas Special** were created by **Bluemoon
+  Interactive** (Ahti Heinla, Jaan Tallinn, and team). All game content, art,
+  music and the original design are theirs. This is an unofficial fan port,
+  not affiliated with or endorsed by Bluemoon; the games are distributed by
+  Bluemoon as freeware.
 - Linux support contributions by Timár Csaba
   ([@xcom169](https://github.com/xcom169)).
 - OPL2 FM synthesis via [Nuked-OPL3](https://github.com/nukeykt/Nuked-OPL3)

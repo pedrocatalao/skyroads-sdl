@@ -3,12 +3,64 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SkyRoads SDL — the 1993 DOS classic, natively on your machine</title>
-<meta name="description" content="Native cross-platform port of SkyRoads (Bluemoon Interactive, 1993) in C + SDL2. macOS, Linux and Windows. No emulation, no DOSBox.">
-<meta property="og:title" content="SkyRoads SDL">
-<meta property="og:description" content="The 1993 DOS space racer, ported natively to macOS, Linux and Windows. Free download.">
+<title>SkyRoads SDL Complete Edition — original, Xmas Special and track editor</title>
+<meta name="description" content="Native cross-platform SkyRoads bundle with the original 1993 DOS game, SkyRoads Xmas Special and track editor. C + SDL2 for macOS, Linux and Windows.">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Pedro Catalao">
+<link rel="canonical" href="https://pedrocatalao.github.io/skyroads-sdl/">
+<meta property="og:title" content="SkyRoads SDL Complete Edition">
+<meta property="og:description" content="Original SkyRoads, Xmas Special and track editor, ported natively to macOS, Linux and Windows. Free download.">
 <meta property="og:image" content="https://pedrocatalao.github.io/skyroads-sdl/title-crt.png">
+<meta property="og:image:alt" content="SkyRoads SDL title screen with CRT effects">
+<meta property="og:url" content="https://pedrocatalao.github.io/skyroads-sdl/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SkyRoads SDL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SkyRoads SDL Complete Edition">
+<meta name="twitter:description" content="Original SkyRoads, Xmas Special and track editor, ported natively to macOS, Linux and Windows. Free download.">
+<meta name="twitter:image" content="https://pedrocatalao.github.io/skyroads-sdl/title-crt.png">
 <link rel="icon" href="icon-256.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "SkyRoads SDL",
+  "alternateName": "SkyRoads SDL Complete Edition",
+  "description": "Native cross-platform bundle of SkyRoads, the 1993 DOS space racer by Bluemoon Interactive, plus SkyRoads Xmas Special and the original track editor, rewritten in portable C with SDL2 for macOS, Linux and Windows.",
+  "url": "https://pedrocatalao.github.io/skyroads-sdl/",
+  "image": "https://pedrocatalao.github.io/skyroads-sdl/title-crt.png",
+  "applicationCategory": "Game",
+  "gamePlatform": ["macOS", "Linux", "Windows"],
+  "operatingSystem": ["macOS", "Linux", "Windows"],
+  "programmingLanguage": "C",
+  "isAccessibleForFree": true,
+  "genre": ["Racing", "Action", "Platform"],
+  "keywords": "SkyRoads, SkyRoads Xmas Special, SkyRoads track editor, native port, SDL2, DOS game, freeware game",
+  "sameAs": "https://github.com/pedrocatalao/skyroads-sdl",
+  "creator": {
+    "@type": "Person",
+    "name": "Pedro Catalao",
+    "url": "https://github.com/pedrocatalao"
+  },
+  "copyrightHolder": {
+    "@type": "Organization",
+    "name": "Bluemoon Interactive"
+  },
+  "downloadUrl": [
+    "https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-macos-universal.zip",
+    "https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-x86_64.tar.gz",
+    "https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-arm64.tar.gz",
+    "https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-windows-x86_64.zip",
+    "https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-windows-arm64.zip"
+  ],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  }
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
@@ -134,7 +186,7 @@
 <header>
   <img class="logo" src="icon-256.png" alt="SkyRoads ship icon" width="128" height="128">
   <h1>SKYROADS<span class="sdl">SDL</span></h1>
-  <div class="tagline">The 1993 DOS space racer — reborn as a native port</div>
+  <div class="tagline">Complete native edition: original, Xmas Special and editor</div>
   <div class="sub">macOS · Linux · Windows &nbsp;—&nbsp; C + SDL2, no emulation, no DOSBox</div>
   <div class="starline"><a href="https://github.com/pedrocatalao/skyroads-sdl">★ <span id="starcount">starred</span> on GitHub — add yours</a></div>
 
@@ -156,7 +208,7 @@
         ⬇ Windows ARM64<small>self-contained zip</small></a>
     </div>
   </div>
-  <div class="free">100% free — the game is Bluemoon's freeware, everything bundled<span class="blink">_</span></div>
+  <div class="free">100% free — Bluemoon's freeware games, editor and SDL2 bundled<span class="blink">_</span></div>
 </header>
 
 <div class="crt"><img src="gameplay.gif" alt="SkyRoads gameplay: a ship jumping between floating road tiles in space"></div>
@@ -167,11 +219,13 @@
   <p>
     <b>SkyRoads</b> (Bluemoon Interactive, 1993) is the legendary DOS game where you
     pilot a ship over floating roads in space — jumping gaps, dodging obstacles,
-    and running out of oxygen at the worst possible moment. This project ports the
-    <em>original source code</em> to portable C + SDL2, so it runs natively on
-    modern machines: the fixed-point physics are bit-exact, the 3D road renderer was
-    rewritten from the original hand-written x86 assembly, and the AdLib soundtrack
-    plays through a proper OPL2 emulator.
+    and running out of oxygen at the worst possible moment. This complete native
+    bundle includes the original game, <b>SkyRoads Xmas Special</b>, and the
+    original track editor. The project ports the <em>original source code</em> to
+    portable C + SDL2, so it runs natively on modern machines: the fixed-point
+    physics are bit-exact, the 3D road renderer was rewritten from the original
+    hand-written x86 assembly, and the AdLib soundtrack plays through a proper
+    OPL2 emulator.
   </p>
 </section>
 
@@ -180,29 +234,11 @@
   <div class="grid">
     <div class="card"><b>Faithful physics</b>The original fixed-point math, untouched — same jumps, same speed, same difficulty. If you had the moves in 1993, you still do.</div>
     <div class="card"><b>Two soundtracks</b>Authentic AdLib FM synthesis by default; press <kbd>F9</kbd> for an "AWE32-style" wavetable mode with sampled instruments.</div>
+    <div class="card"><b>Xmas Special</b>Press <kbd>X</kbd> on the main menu to switch to the 1994 holiday edition with 30 more roads.</div>
+    <div class="card"><b>Track editor</b>Press <kbd>E</kbd> on the main menu to build and play custom roads in the native port.</div>
     <div class="card"><b>CRT mode</b>Press <kbd>F10</kbd> for scanlines, phosphor trails and smooth scaling — like the monitor you played it on.</div>
-    <div class="card"><b>Truly portable</b>One download, zero installs: game data and SDL2 are bundled. Untar (or unzip) and fly.</div>
+    <div class="card"><b>Truly portable</b>One download, zero installs: game data, editor and SDL2 are bundled. Untar (or unzip) and fly.</div>
   </div>
-</section>
-
-<section>
-  <h2>Also runs in DOS ex Machina</h2>
-  <p>
-    The same port doubles as a core for
-    <a href="https://dosexmachina.com/"><b>DOS ex Machina</b></a>
-    — a procedurally-drawn beige box with a simulated CRT, which boots a DOS
-    prompt and runs the game behind the glass. Nothing to download by hand:
-    type <code>NC</code> at the prompt and the machine fetches it for you.
-  </p>
-  <p style="margin-top:14px">
-    <img src="dxm.jpg" alt="SkyRoads running inside DOS ex Machina"
-         style="width:100%;height:auto;display:block;border:1px solid rgba(255,255,255,.12)">
-  </p>
-  <p style="margin-top:14px">
-    The <code>.dxm</code> files on the releases page are that build — the game
-    as a loadable module, one per platform. They are not standalone programs;
-    DXM opens them. The downloads above are unaffected and need none of it.
-  </p>
 </section>
 
 <section>
@@ -226,13 +262,15 @@ cd skyroads
     <tr><td>P</td><td>pause</td></tr>
     <tr><td>F9</td><td>music: AdLib FM ↔ wavetable</td></tr>
     <tr><td>F10</td><td>CRT effects on / off</td></tr>
+    <tr><td>X</td><td>switch SkyRoads / Xmas Special from the main menu</td></tr>
+    <tr><td>E</td><td>open the track editor from the main menu</td></tr>
     <tr><td>F11 / Cmd-F</td><td>fullscreen</td></tr>
   </table>
 </section>
 
 <footer>
-  <p>An unofficial fan port. <b>SkyRoads</b> © Bluemoon Interactive (Ahti Heinla, Jaan Tallinn &amp; team),
-  who distribute the original as freeware — all game content is theirs.</p>
+  <p>An unofficial fan port. <b>SkyRoads</b> and <b>SkyRoads Xmas Special</b> © Bluemoon Interactive
+  (Ahti Heinla, Jaan Tallinn &amp; team), who distribute the games as freeware — all game content is theirs.</p>
   <p style="margin-top:10px">
     <a href="https://github.com/pedrocatalao/skyroads-sdl">★ Source on GitHub</a>
     &nbsp;·&nbsp; Linux contributions by Timár Csaba

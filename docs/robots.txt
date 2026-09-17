@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pedrocatalao.github.io/skyroads-sdl/sitemap.xml

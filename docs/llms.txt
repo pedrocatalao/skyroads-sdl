@@ -1,0 +1,25 @@
+# SkyRoads SDL Complete Edition
+
+SkyRoads SDL is a native, cross-platform bundle of SkyRoads, the 1993 DOS space racer by Bluemoon Interactive.
+
+It includes the original SkyRoads, SkyRoads Xmas Special, and Bluemoon's original track editor. The project rewrites the original source code in portable C with SDL2 so the games run natively on macOS, Linux, and Windows without DOSBox or emulation. It preserves the original fixed-point physics, ports the hand-written x86 road renderer, and includes AdLib FM synthesis plus an optional wavetable soundtrack mode.
+
+Official site: https://pedrocatalao.github.io/skyroads-sdl/
+Source code: https://github.com/pedrocatalao/skyroads-sdl
+Latest releases: https://github.com/pedrocatalao/skyroads-sdl/releases/latest
+
+## Downloads
+
+- macOS universal app: https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-macos-universal.zip
+- Linux x86_64 tarball: https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-x86_64.tar.gz
+- Linux ARM64 tarball: https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-linux-arm64.tar.gz
+- Windows x86_64 zip: https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-windows-x86_64.zip
+- Windows ARM64 zip: https://github.com/pedrocatalao/skyroads-sdl/releases/latest/download/skyroads-windows-arm64.zip
+
+## Key Facts
+
+- Platforms: macOS, Linux, Windows
+- Language and libraries: C, SDL2
+- Distribution: self-contained downloads with freeware game data, the Xmas Special, the track editor, and SDL2 bundled
+- License and rights: unofficial fan port; SkyRoads and SkyRoads Xmas Special game content belongs to Bluemoon Interactive
+- Controls: arrow keys steer and accelerate or brake, Space jumps, P pauses, X switches between SkyRoads and SkyRoads Xmas Special from the main menu, E opens the track editor, F9 switches music mode, F10 toggles CRT effects, F11 or Cmd-F toggles fullscreen
